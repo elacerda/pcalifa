@@ -81,7 +81,7 @@ if __name__ == '__main__':
     # removendo linhas flaggeds do califa
     histo = K.f_flag.sum(axis = 1) / K.N_zone
     maskHisto = (histo < flagLinesQuantil)
-    mask = maskHisto & ((K.l_obs > 3800) | (K.l_obs < 6850))
+    mask = maskHisto & (K.l_obs > 3800) & (K.l_obs < 6850)
 
     if removeStarlightEmLines == True:
         maskEmLines = removeStarlightMask(maskfile, K.l_obs)
