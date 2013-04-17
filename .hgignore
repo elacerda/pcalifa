@@ -1,0 +1,5 @@
+
+syntax: glob
+*.png
+syntax: regexp
+^src/runallgal\.sh$
