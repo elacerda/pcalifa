@@ -6,40 +6,19 @@ Created on 19/10/2012
 import matplotlib
 matplotlib.use('agg')
 
-from pycasso.fitsdatacube import fitsQ3DataCube
-import pystarlight.io
 import sys
 import numpy as np
-from scipy import linalg
-import atpy
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 from matplotlib import pyplot as plt
+from PCAlifa import *
 
 califaID = sys.argv[1]
-fitsfile = '/home/lacerda/CALIFA/%s/%s_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits' % (califaID, califaID)
 maskfile = '/home/lacerda/workspace/PCA/src/Mask.mC'
-K = fitsQ3DataCube(fitsfile)
+K = loadOneCube(califaID)
 tmax = 20 # numero maximo de eigenvalues
 removeStarlightEmLines = False
 flagLinesQuantil = 0.9
-
-def PCA(arr, num, axis = -1, arrMean = None):
-    if arrMean == None:
-        arrMean = arr.mean(axis = axis)
-
-    diff = arr - arrMean
-    covMat = np.dot(diff.T, diff) / (num - 1.)
-    w, e = linalg.eig(covMat)
-
-    return diff, covMat, arrMean, np.real(w), np.real(e)
-
-def tomogram(K, I, eigvec, extensive = True):
-    t__zk = np.dot(I, eigvec)
-    #t__kyx = K.zoneToYX(t__zk.T, extensive = False)
-    t__kyx = K.zoneToYX(t__zk.T, extensive = extensive)
-
-    return t__zk, t__kyx
 
 def tomoPlot(tn, l, t, eigvec, eigval, npref):
     fig = plt.figure(figsize = (15, 5))
@@ -58,18 +37,7 @@ def tomoPlot(tn, l, t, eigvec, eigval, npref):
     fig.savefig('%stomo%02i.png' % (npref, tn))
     plt.close()
 
-def removeStarlightMask(maskfile, l_obs):
-    t = atpy.Table(maskfile = maskfile, type = 'starlight_mask')
-
-    mask = (l_obs > t[0]['l_up'])
-
-    for i in range(1, len(t)):
-        if (t[i]['weight'] == 0.0):
-            mask = mask & ((l_obs < t[i]['l_low']) | (l_obs > t[i]['l_up']))
-
-    return mask
-
-def screeTest(eigval, maxInd, npref):
+def screeTestPlot(eigval, maxInd, npref):
     fig = plt.figure(figsize = (8, 6))
     eigval_norm = eigval / eigval.sum()
     plt.plot(eigval_norm[:maxInd], linestyle = '-', marker = '*')
@@ -112,7 +80,7 @@ if __name__ == '__main__':
 
     npref = '%s_f_obs_' % K.califaID
 
-    screeTest(eigval_obs_S__k, tmax, npref)
+    screeTestPlot(eigval_obs_S__k, tmax, npref)
 
     for tn in range(tmax):
         tomoPlot(tn, l_obs, t__kyx, eigvec_obs_S__lk, eigval_obs_S__k, npref)
@@ -131,7 +99,7 @@ if __name__ == '__main__':
 
     npref = '%s_f_obs_norm_' % K.califaID
 
-    screeTest(eigval_obs_norm_S__k, tmax, npref)
+    screeTestPlot(eigval_obs_norm_S__k, tmax, npref)
 
     for tn in range(tmax):
         tomoPlot(tn, l_obs, t__kyx, eigvec_obs_norm_S__lk, eigval_obs_norm_S__k, npref)
@@ -150,7 +118,7 @@ if __name__ == '__main__':
 
     npref = '%s_f_syn_' % K.califaID
 
-    screeTest(eigval_syn_S__k, tmax, npref)
+    screeTestPlot(eigval_syn_S__k, tmax, npref)
 
     for tn in range(tmax):
         tomoPlot(tn, l_obs, t__kyx, eigvec_syn_S__lk, eigval_syn_S__k, npref)
@@ -169,7 +137,7 @@ if __name__ == '__main__':
 
     npref = '%s_f_syn_norm_' % K.califaID
 
-    screeTest(eigval_syn_norm_S__k, tmax, npref)
+    screeTestPlot(eigval_syn_norm_S__k, tmax, npref)
 
     for tn in range(tmax):
         tomoPlot(tn, l_obs, t__kyx, eigvec_syn_norm_S__lk, eigval_syn_norm_S__k, npref)
@@ -188,7 +156,7 @@ if __name__ == '__main__':
 
     npref = '%s_f_res_' % K.califaID
 
-    screeTest(eigval_res_S__k, tmax, npref)
+    screeTestPlot(eigval_res_S__k, tmax, npref)
 
     for tn in range(tmax):
         tomoPlot(tn, l_obs, t__kyx, eigvec_res_S__lk, eigval_res_S__k, npref)
@@ -207,7 +175,7 @@ if __name__ == '__main__':
 
     npref = '%s_f_res_norm_' % K.califaID
 
-    screeTest(eigval_res_norm_S__k, tmax, npref)
+    screeTestPlot(eigval_res_norm_S__k, tmax, npref)
 
     for tn in range(tmax):
         tomoPlot(tn, l_obs, t__kyx, eigvec_res_norm_S__lk, eigval_res_norm_S__k, npref)
