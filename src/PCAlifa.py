@@ -3,6 +3,8 @@ Created on 19/10/2012
 
 @author: lacerda
 '''
+import matplotlib
+matplotlib.use('agg')
 
 from pycasso.fitsdatacube import fitsQ3DataCube
 from matplotlib.ticker import MaxNLocator
@@ -12,9 +14,10 @@ from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
 import pystarlight.io
 import atpy
+import sys
 
-califaID = 'K0277'
-#califaID = 'K0577'
+califaID = sys.argv[1]
+
 fitsfile = '/home/lacerda/CALIFA/%s/%s_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits' % (califaID, califaID)
 maskfile = '/home/lacerda/workspace/PCA/src/Mask.mC'
 K = fitsQ3DataCube(fitsfile)
