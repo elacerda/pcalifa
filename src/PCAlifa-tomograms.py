@@ -52,7 +52,8 @@ if __name__ == '__main__':
     P = PCA.PCAlifa(califaID = califaID,
                     fitsDir = fitsDir,
                     flagLinesQuantil = flagLinesQuantil,
-                    remFlaggedLambdas = remFlaggedLambdas)
+                    remFlaggedLambdas = remFlaggedLambdas,
+                    runDefaultPCA = True)
 
     if (remStarlightEmLines == True):
         P.removeStarlightEmLines(maskfile)
@@ -61,82 +62,64 @@ if __name__ == '__main__':
 ################################ f_obs ##################################
 #########################################################################
 
-    I_obs__zl, ms_obs, eigval_obs__k, eigvec_obs__lk = P.PCA(P.f_obs__zl, P.K.N_zone, 0)
-    t__zk, t__kyx = P.tomogram(I_obs__zl, eigvec_obs__lk)
-
     npref = '%s_f_obs_' % P.K.califaID
 
-    screeTestPlot(eigval_obs__k, tmax, npref)
+    screeTestPlot(P.eigval_obs__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, t__kyx, eigvec_obs__lk, eigval_obs__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_obs__kyx, P.eigvec_obs__lk, P.eigval_obs__k, npref)
 
 ########################################################################
 ########################### f_obs_norm #################################
 ########################################################################
 
-    I_obs_norm__zl, ms_obs_norm, eigval_obs_norm__k, eigvec_obs_norm__lk = P.PCA(P.f_obs_norm__zl, P.K.N_zone, 0)
-    t__zk, t__kyx = P.tomogram(I_obs_norm__zl, eigvec_obs_norm__lk)
-
     npref = '%s_f_obs_norm_' % P.K.califaID
 
-    screeTestPlot(eigval_obs_norm__k, tmax, npref)
+    screeTestPlot(P.eigval_obs_norm__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, t__kyx, eigvec_obs_norm__lk, eigval_obs_norm__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_obs_norm__kyx, P.eigvec_obs_norm__lk, P.eigval_obs_norm__k, npref)
 
 ########################################################################
 ############################# f_syn ####################################
 ########################################################################
 
-    I_syn__zl, ms_syn, eigval_syn__k, eigvec_syn__lk = P.PCA(P.f_syn__zl, P.K.N_zone, 0)
-    t__zk, t__kyx = P.tomogram(I_syn__zl, eigvec_syn__lk)
-
     npref = '%s_f_syn_' % P.K.califaID
 
-    screeTestPlot(eigval_syn__k, tmax, npref)
+    screeTestPlot(P.eigval_syn__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, t__kyx, eigvec_syn__lk, eigval_syn__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_syn__kyx, P.eigvec_syn__lk, P.eigval_syn__k, npref)
 
 ########################################################################
 ########################### f_syn_norm #################################
 ########################################################################
 
-    I_syn_norm__zl, ms_syn_norm, eigval_syn_norm__k, eigvec_syn_norm__lk = P.PCA(P.f_syn_norm__zl, P.K.N_zone, 0)
-    t__zk, t__kyx = P.tomogram(I_syn_norm__zl, eigvec_syn_norm__lk)
-
     npref = '%s_f_syn_norm_' % P.K.califaID
 
-    screeTestPlot(eigval_syn_norm__k, tmax, npref)
+    screeTestPlot(P.eigval_syn_norm__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, t__kyx, eigvec_syn_norm__lk, eigval_syn_norm__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_syn_norm__kyx, P.eigvec_syn_norm__lk, P.eigval_syn_norm__k, npref)
 
 ########################################################################
 ############################### f_res ##################################
 ########################################################################
 
-    I_res__zl, ms_res, eigval_res__k, eigvec_res__lk = P.PCA(P.f_res__zl, P.K.N_zone, 0)
-    t__zk, t__kyx = P.tomogram(I_res__zl, eigvec_res__lk)
-
     npref = '%s_f_res_' % P.K.califaID
 
-    screeTestPlot(eigval_res__k, tmax, npref)
+    screeTestPlot(P.eigval_res__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, t__kyx, eigvec_res__lk, eigval_res__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_res__kyx, P.eigvec_res__lk, P.eigval_res__k, npref)
 
 ########################################################################
 ############################# f_res_norm ###############################
 ########################################################################
 
-    I_res_norm__zl, ms_res_norm, eigval_res_norm__k, eigvec_res_norm__lk = P.PCA(P.f_res_norm__zl, P.K.N_zone, 0)
-    t__zk, t__kyx = P.tomogram(I_res_norm__zl, eigvec_res_norm__lk)
-
     npref = '%s_f_res_norm_' % P.K.califaID
 
-    screeTestPlot(eigval_res_norm__k, tmax, npref)
+    screeTestPlot(P.eigval_res_norm__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, t__kyx, eigvec_res_norm__lk, eigval_res_norm__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_res_norm__kyx, P.eigvec_res_norm__lk, P.eigval_res_norm__k, npref)
