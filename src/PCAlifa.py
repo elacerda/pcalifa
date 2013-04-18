@@ -16,18 +16,18 @@ class PCAlifa:
         self.histo = None
         self.tStarlight = None
         self.starlightMaskFile = None
-        self.I_obs__zl, self.ms_obs, self.covMat_obs__ll, self.eigVal_obs__k, self.eigVec_obs__lk = None
-        self.I_obs_norm__zl, self.ms_obs_norm, self.covMat_obs_norm__ll, self.eigVal_obs_norm__k, self.eigVec_obs_norm__lk = None
-        self.I_syn__zl, self.ms_syn, self.covMat_syn__ll, self.eigVal_syn__k, self.eigVec_syn__lk = None
-        self.I_syn_norm__zl, self.ms_syn_norm, self.covMat_syn_norm__ll, self.eigVal_syn_norm__k, self.eigVec_syn_norm__lk = None
-        self.I_res__zl, self.ms_res, self.covMat_res__ll, self.eigVal_res__k, self.eigVec_res__lk = None
-        self.I_res_norm__zl, self.ms_res_norm, self.covMat_res_norm__ll, self.eigVal_res_norm__k, self.eigVec_res_norm__lk = None
-        self.tomo_obs__zk, self.tomo_obs__kyx = None
-        self.tomo_obs_norm__zk, self.tomo_obs_norm__kyx = None
-        self.tomo_syn__zk, self.tomo_syn__kyx = None
-        self.tomo_syn_norm__zk, self.tomo_syn_norm__kyx = None
-        self.tomo_res__zk, self.tomo_res__kyx = None
-        self.tomo_res_norm__zk, self.tomo_res_norm__kyx = None
+#        self.I_obs__zl, self.ms_obs, self.covMat_obs__ll, self.eigVal_obs__k, self.eigVec_obs__lk = None
+#        self.I_obs_norm__zl, self.ms_obs_norm, self.covMat_obs_norm__ll, self.eigVal_obs_norm__k, self.eigVec_obs_norm__lk = None
+#        self.I_syn__zl, self.ms_syn, self.covMat_syn__ll, self.eigVal_syn__k, self.eigVec_syn__lk = None
+#        self.I_syn_norm__zl, self.ms_syn_norm, self.covMat_syn_norm__ll, self.eigVal_syn_norm__k, self.eigVec_syn_norm__lk = None
+#        self.I_res__zl, self.ms_res, self.covMat_res__ll, self.eigVal_res__k, self.eigVec_res__lk = None
+#        self.I_res_norm__zl, self.ms_res_norm, self.covMat_res_norm__ll, self.eigVal_res_norm__k, self.eigVec_res_norm__lk = None
+#        self.tomo_obs__zk, self.tomo_obs__kyx = None
+#        self.tomo_obs_norm__zk, self.tomo_obs_norm__kyx = None
+#        self.tomo_syn__zk, self.tomo_syn__kyx = None
+#        self.tomo_syn_norm__zk, self.tomo_syn_norm__kyx = None
+#        self.tomo_res__zk, self.tomo_res__kyx = None
+#        self.tomo_res_norm__zk, self.tomo_res_norm__kyx = None
 
         self.califaID = califaID
         self.flagLinesQuantil = flagLinesQuantil
@@ -120,7 +120,6 @@ class PCAlifa:
         del self.I_syn_norm__zl, self.ms_syn_norm, self.covMat_syn_norm__ll, self.eigVal_syn_norm__k, self.eigVec_syn_norm__lk
         del self.I_res__zl, self.ms_res, self.covMat_res__ll, self.eigVal_res__k, self.eigVec_res__lk
         del self.I_res_norm__zl, self.ms_res_norm, self.covMat_res_norm__ll, self.eigVal_res_norm__k, self.eigVec_res_norm__lk
-
         del self.tomo_obs__zk, self.tomo_obs__kyx
         del self.tomo_obs_norm_zk, self.tomo_obs_norm__kyx
         del self.tomo_syn__zk, self.tomo_syn__kyx
