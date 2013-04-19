@@ -115,3 +115,5 @@ if __name__ == '__main__':
             zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_res_norm__zl,
                             P.tomo_res_norm__zk, P.eigVec_res_norm__lk,
                             P.eigVal_res_norm__k, P.ms_res_norm, nPref)
+    else:
+        print "%s N_Zone < 200" % P.K.califaID
