@@ -70,7 +70,7 @@ class PCAlifa:
         self.tomo_obs__zk, self.tomo_obs__kyx = self.tomogram(self.I_obs__zl, self.eigVec_obs__lk)
 
     def tomograms_obs_norm(self):
-        self.tomo_obs_norm_zk, self.tomo_obs_norm__kyx = self.tomogram(self.I_obs__zl, self.eigVec_obs__lk)
+        self.tomo_obs_norm__zk, self.tomo_obs_norm__kyx = self.tomogram(self.I_obs__zl, self.eigVec_obs__lk)
 
     def tomograms_syn(self):
         self.tomo_syn__zk, self.tomo_syn__kyx = self.tomogram(self.I_obs__zl, self.eigVec_obs__lk)
@@ -161,8 +161,8 @@ class PCAlifa:
         self.mask = self.mask & mask
         self.initVars(self)
 
-    def rebuildSpectra(self, tomo, eigVec, mean, n):
-        I_rec = np.dot(tomo[:, :n], eigVec[:, :n].transpose())
+    def rebuildSpectra(self, tomo, eigVec, mean, ne):
+        I_rec = np.dot(tomo[:, :ne], eigVec[:, :ne].transpose())
         f_rec = I_rec + mean
 
         return I_rec, f_rec
