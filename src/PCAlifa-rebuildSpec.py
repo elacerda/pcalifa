@@ -81,36 +81,37 @@ if __name__ == '__main__':
     if (remStarlightEmLines == True):
         P.removeStarlightEmLines(maskfile)
 
-    zonesRebuild = np.array([0, 10, 20, 100, 200, P.K.N_zone - 1])
+    if (P.K.N_zone > 200):
+        zonesRebuild = np.array([0, 10, 20, 100, 200, P.K.N_zone - 1])
 
-    for zone in zonesRebuild:
-        eigvecRebuildArr = np.array([1, 2, 3, 4, 5, 6, 10, 20])
-        nPref = '%s-f_obs' % P.K.califaID
-        zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_obs__zl,
-                        P.tomo_obs__zk, P.eigVec_obs__lk,
-                        P.eigVal_obs__k, P.ms_obs, nPref)
+        for zone in zonesRebuild:
+            eigvecRebuildArr = np.array([1, 2, 3, 4, 5, 6, 10, 20])
+            nPref = '%s-f_obs' % P.K.califaID
+            zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_obs__zl,
+                            P.tomo_obs__zk, P.eigVec_obs__lk,
+                            P.eigVal_obs__k, P.ms_obs, nPref)
 
-        nPref = '%s-f_obs_norm' % P.K.califaID
-        zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_obs_norm__zl,
-                        P.tomo_obs_norm__zk, P.eigVec_obs_norm__lk,
-                        P.eigVal_obs_norm__k, P.ms_obs_norm, nPref)
+            nPref = '%s-f_obs_norm' % P.K.califaID
+            zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_obs_norm__zl,
+                            P.tomo_obs_norm__zk, P.eigVec_obs_norm__lk,
+                            P.eigVal_obs_norm__k, P.ms_obs_norm, nPref)
 
-        nPref = '%s-f_syn' % P.K.califaID
-        zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_syn__zl,
-                        P.tomo_syn__zk, P.eigVec_syn__lk,
-                        P.eigVal_syn__k, P.ms_syn, nPref)
+            nPref = '%s-f_syn' % P.K.califaID
+            zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_syn__zl,
+                            P.tomo_syn__zk, P.eigVec_syn__lk,
+                            P.eigVal_syn__k, P.ms_syn, nPref)
 
-        nPref = '%s-f_syn_norm' % P.K.califaID
-        zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_syn_norm__zl,
-                        P.tomo_syn_norm__zk, P.eigVec_syn_norm__lk,
-                        P.eigVal_syn_norm__k, P.ms_syn_norm, nPref)
+            nPref = '%s-f_syn_norm' % P.K.califaID
+            zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_syn_norm__zl,
+                            P.tomo_syn_norm__zk, P.eigVec_syn_norm__lk,
+                            P.eigVal_syn_norm__k, P.ms_syn_norm, nPref)
 
-        nPref = '%s-f_res' % P.K.califaID
-        zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_res__zl,
-                        P.tomo_res__zk, P.eigVec_res__lk,
-                        P.eigVal_res__k, P.ms_res, nPref)
+            nPref = '%s-f_res' % P.K.califaID
+            zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_res__zl,
+                            P.tomo_res__zk, P.eigVec_res__lk,
+                            P.eigVal_res__k, P.ms_res, nPref)
 
-        nPref = '%s-f_res' % P.K.califaID
-        zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_res_norm__zl,
-                        P.tomo_res_norm__zk, P.eigVec_res_norm__lk,
-                        P.eigVal_res_norm__k, P.ms_res_norm, nPref)
+            nPref = '%s-f_res' % P.K.califaID
+            zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_res_norm__zl,
+                            P.tomo_res_norm__zk, P.eigVec_res_norm__lk,
+                            P.eigVal_res_norm__k, P.ms_res_norm, nPref)
