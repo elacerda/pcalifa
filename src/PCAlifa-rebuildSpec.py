@@ -25,7 +25,7 @@ remFlaggedLambdas = True
 remStarlightEmLines = False
 tmax = 20 # numero maximo de eigenvalues
 
-def zoneRebuildPlot(P, nZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, adevC = True):
+def zoneRebuildPlot(P, nZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, resid = False):
     i = 0
     nCols = 2
     nRows = len(evRebArr) / nCols
@@ -49,14 +49,21 @@ def zoneRebuildPlot(P, nZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, adevC 
 
         textStrAdev = ''
 
-        if (adevC == True):
+        if (resid == True):
+            ax.set_ylim([1.1 * O[zone, :].min(), 1.1 * O[zone, :].max()])
+        else:
+            ax.set_ylim([-0.5 * O[zone, :].mean(), 1.5 * O[zone, :].mean()])
             adev = 100. * (1. / P.K.N_zone) * (np.abs(diff) / O[zone, :]).sum()
             textStrAdev = 'adev =  %.4f %% - ' % adev
 
         textStr = '%ssigmaReb = %.2e - sigmaNReb = %.2e - ratio = %.4f' % (textStrAdev, sigmaReb, sigmaNReb, sigmaRatio)
 
-        ax.plot(P.l_obs, O[zone, :], label = 'Obs', linewidth = 0.3)
-        ax.plot(P.l_obs, M[zone, :], label = 'Mod', linewidth = 0.3)
+        ax.plot(P.l_obs, O[zone, :], label = 'Obs',
+                )
+#                linewidth = 0.8)
+        ax.plot(P.l_obs, M[zone, :], label = 'Mod',
+                )
+#                linewidth = 0.8)
         ax.plot(P.l_obs, diff * 5., label = 'Res x 5')
         ax.xaxis.set_major_locator(MaxNLocator(20))
         ax.text(0.01, 0.92, textStr,
@@ -86,7 +93,7 @@ if __name__ == '__main__':
                     fitsDir = fitsDir,
                     flagLinesQuantil = flagLinesQuantil,
                     remFlaggedLambdas = remFlaggedLambdas,
-                    runDefaultPCA = True)
+                    runDefaultPCA = False)
 
     if (remStarlightEmLines == True):
         P.removeStarlightEmLines(maskfile)
@@ -97,34 +104,52 @@ if __name__ == '__main__':
         for zone in zonesRebuild:
             eigvecRebuildArr = np.array([1, 2, 3, 4, 5, 6, 10, 20])
 
+            P.PCA_obs()
+            P.tomograms_obs()
+
             nPref = '%s-f_obs' % P.K.califaID
             zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_obs__zl,
                             P.tomo_obs__zk, P.eigVec_obs__lk,
                             P.eigVal_obs__k, P.ms_obs__l, nPref)
+
+            P.PCA_obs_norm()
+            P.tomograms_obs_norm()
 
             nPref = '%s-f_obs_norm' % P.K.califaID
             zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_obs_norm__zl,
                             P.tomo_obs_norm__zk, P.eigVec_obs_norm__lk,
                             P.eigVal_obs_norm__k, P.ms_obs_norm__l, nPref)
 
+            P.PCA_syn()
+            P.tomograms_syn()
+
             nPref = '%s-f_syn' % P.K.califaID
             zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_syn__zl,
                             P.tomo_syn__zk, P.eigVec_syn__lk,
                             P.eigVal_syn__k, P.ms_syn__l, nPref)
+
+            P.PCA_syn_norm()
+            P.tomograms_syn_norm()
 
             nPref = '%s-f_syn_norm' % P.K.califaID
             zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_syn_norm__zl,
                             P.tomo_syn_norm__zk, P.eigVec_syn_norm__lk,
                             P.eigVal_syn_norm__k, P.ms_syn_norm__l, nPref)
 
+            P.PCA_res()
+            P.tomograms_res()
+
             nPref = '%s-f_res' % P.K.califaID
             zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_res__zl,
                             P.tomo_res__zk, P.eigVec_res__lk,
-                            P.eigVal_res__k, P.ms_res__l, nPref, adevC = False)
+                            P.eigVal_res__k, P.ms_res__l, nPref, resid = True)
+
+            P.PCA_res_norm()
+            P.tomograms_res_norm()
 
             nPref = '%s-f_res' % P.K.califaID
             zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_res_norm__zl,
                             P.tomo_res_norm__zk, P.eigVec_res_norm__lk,
-                            P.eigVal_res_norm__k, P.ms_res_norm__l, nPref, adevC = False)
+                            P.eigVal_res_norm__k, P.ms_res_norm__l, nPref, resid = True)
     else:
         print "%s N_Zone < 200" % P.K.califaID
