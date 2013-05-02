@@ -33,7 +33,9 @@ def zoneRebuildPlot(P, nZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, resid 
     #plt.rcParams.update({'font.family': 'serif', 'text.usetex': True, 'backend': 'ps'})
     gs = gridspec.GridSpec(nRows, nCols, width_ratios = [1, 1], hspace = 0)
 
-    for ne in evRebArr:
+    adev = np.zeros_like(evRebArr)
+
+    for i, ne in enumerate(evRebArr):
         ax = plt.subplot(gs[i])
 
         I_reb__zl, M = P.rebuildSpectra(tomo, eVec, mean, ne)
@@ -53,8 +55,8 @@ def zoneRebuildPlot(P, nZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, resid 
             ax.set_ylim([1.1 * O[zone, :].min(), 1.1 * O[zone, :].max()])
         else:
             ax.set_ylim([-0.5 * O[zone, :].mean(), 1.5 * O[zone, :].mean()])
-            adev = 100. * (1. / P.K.N_zone) * (np.abs(diff) / O[zone, :]).sum()
-            textStrAdev = 'adev =  %.4f %% - ' % adev
+            adev[i] = 100. * (1. / P.K.N_zone) * (np.abs(diff) / O[zone, :]).sum()
+            textStrAdev = 'adev =  %.4f %% - ' % adev[i]
 
         textStr = '%ssigmaReb = %.2e - sigmaNReb = %.2e - ratio = %.4f' % (textStrAdev, sigmaReb, sigmaNReb, sigmaRatio)
 
@@ -87,6 +89,15 @@ def zoneRebuildPlot(P, nZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, resid 
     plt.tight_layout(pad = 2., w_pad = 0., h_pad = 0.)
     fig.savefig('%s-zone-%04d.png' % (nPref, zone))
     plt.close()
+
+    if (resid == False):
+        fig = plt.figure(figsize = (19.8, 10.8))
+        plt.plot(evRebArr, adev, label = 'adev')
+        plt.legend()
+        plt.xlabel('Number of eigenvectors')
+        plt.ylabel('adev')
+        fig.savefig('%s-zone-%04d-adev.png' % (nPref, zone))
+        plt.close()
 
 if __name__ == '__main__':
     P = PCA.PCAlifa(califaID = califaID,
@@ -147,7 +158,7 @@ if __name__ == '__main__':
             P.PCA_res_norm()
             P.tomograms_res_norm()
 
-            nPref = '%s-f_res' % P.K.califaID
+            nPref = '%s-f_res_norm' % P.K.califaID
             zoneRebuildPlot(P, zone, eigvecRebuildArr, P.f_res_norm__zl,
                             P.tomo_res_norm__zk, P.eigVec_res_norm__lk,
                             P.eigVal_res_norm__k, P.ms_res_norm__l, nPref, resid = True)

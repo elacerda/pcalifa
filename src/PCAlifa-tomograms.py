@@ -64,10 +64,10 @@ if __name__ == '__main__':
 
     npref = '%s_f_obs_' % P.K.califaID
 
-    screeTestPlot(P.eigval_obs__k, tmax, npref)
+    screeTestPlot(P.eigVal_obs__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, P.tomo_obs__kyx, P.eigvec_obs__lk, P.eigval_obs__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_obs__kyx, P.eigVec_obs__lk, P.eigVal_obs__k, npref)
 
 ########################################################################
 ########################### f_obs_norm #################################
@@ -75,10 +75,10 @@ if __name__ == '__main__':
 
     npref = '%s_f_obs_norm_' % P.K.califaID
 
-    screeTestPlot(P.eigval_obs_norm__k, tmax, npref)
+    screeTestPlot(P.eigVal_obs_norm__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, P.tomo_obs_norm__kyx, P.eigvec_obs_norm__lk, P.eigval_obs_norm__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_obs_norm__kyx, P.eigVec_obs_norm__lk, P.eigVal_obs_norm__k, npref)
 
 ########################################################################
 ############################# f_syn ####################################
@@ -86,10 +86,10 @@ if __name__ == '__main__':
 
     npref = '%s_f_syn_' % P.K.califaID
 
-    screeTestPlot(P.eigval_syn__k, tmax, npref)
+    screeTestPlot(P.eigVal_syn__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, P.tomo_syn__kyx, P.eigvec_syn__lk, P.eigval_syn__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_syn__kyx, P.eigVec_syn__lk, P.eigVal_syn__k, npref)
 
 ########################################################################
 ########################### f_syn_norm #################################
@@ -97,10 +97,10 @@ if __name__ == '__main__':
 
     npref = '%s_f_syn_norm_' % P.K.califaID
 
-    screeTestPlot(P.eigval_syn_norm__k, tmax, npref)
+    screeTestPlot(P.eigVal_syn_norm__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, P.tomo_syn_norm__kyx, P.eigvec_syn_norm__lk, P.eigval_syn_norm__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_syn_norm__kyx, P.eigVec_syn_norm__lk, P.eigVal_syn_norm__k, npref)
 
 ########################################################################
 ############################### f_res ##################################
@@ -108,10 +108,10 @@ if __name__ == '__main__':
 
     npref = '%s_f_res_' % P.K.califaID
 
-    screeTestPlot(P.eigval_res__k, tmax, npref)
+    screeTestPlot(P.eigVal_res__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, P.tomo_res__kyx, P.eigvec_res__lk, P.eigval_res__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_res__kyx, P.eigVec_res__lk, P.eigVal_res__k, npref)
 
 ########################################################################
 ############################# f_res_norm ###############################
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
     npref = '%s_f_res_norm_' % P.K.califaID
 
-    screeTestPlot(P.eigval_res_norm__k, tmax, npref)
+    screeTestPlot(P.eigVal_res_norm__k, tmax, npref)
 
     for tn in range(tmax):
-        tomoPlot(tn, P.l_obs, P.tomo_res_norm__kyx, P.eigvec_res_norm__lk, P.eigval_res_norm__k, npref)
+        tomoPlot(tn, P.l_obs, P.tomo_res_norm__kyx, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, npref)
