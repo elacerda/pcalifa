@@ -4,7 +4,6 @@ Created on 18/04/2013
 @author: lacerda
 '''
 import matplotlib
-from reportlab.lib import textsplit
 matplotlib.use('agg')
 
 import sys

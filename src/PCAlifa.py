@@ -27,12 +27,12 @@ class PCAlifa:
 
         self.initVars()
 
-        if (self.remFlaggedLambdas == True):
+        if self.remFlaggedLambdas:
             self.removeFlaggedLambda()
 
         self.runDefaultPCA = runDefaultPCA
 
-        if (self.runDefaultPCA == True):
+        if self.runDefaultPCA:
             self.runPCA()
 
     def PCA_obs(self):
@@ -136,6 +136,7 @@ class PCAlifa:
         self.initVars()
 
     def removeStarlightEmLines(self, maskFile):
+        self.remFlaggedLambdas = True
         self.starlightMaskFile = maskFile
         t = atpy.Table(maskfile = maskFile, type = 'starlight_mask')
         mask = (self.K.l_obs > t[0]['l_up'])

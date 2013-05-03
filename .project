@@ -4,6 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>pycasso</project>
+		<project>pystarlight</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
