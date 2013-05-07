@@ -11,17 +11,7 @@ import numpy as np
 import scipy.stats as st
 from matplotlib import pyplot as plt
 import PCAlifa as PCA
-
-#fitsDir = '/home/lacerda/CALIFA'
-#califaID = 'K0802'
-fitsDir = sys.argv[1]
-califaID = sys.argv[2]
-
-maskfile = '/home/lacerda/workspace/PCA/src/Mask.mC'
-flagLinesQuantil = 0.9
-remFlaggedLambdas = True
-remStarlightEmLines = True
-tmax = 20 # numero maximo de eigenvalues
+import argparse as ap
 
 def corrPlot(x, y, ax):
         rhoPearson, pvalPearson = st.pearsonr(x, y)
@@ -45,14 +35,39 @@ def corrPlot(x, y, ax):
 
         plt.setp(ax.get_yticklabels(), visible = False)
 
-if __name__ == '__main__':
-    P = PCA.PCAlifa(califaID = califaID,
-                    fitsDir = fitsDir,
-                    flagLinesQuantil = flagLinesQuantil,
-                    remFlaggedLambdas = remFlaggedLambdas)
+def parser_args():
+    parser = ap.ArgumentParser(description = 'PCAlifa - correlations')
+    parser.add_argument('--califaID', '-c',
+                        help = 'Califa ID (ex: K0277)',
+                        type = str,
+                        default = 'K0277')
+    parser.add_argument('--fitsDir', '-f',
+                        help = 'Califa FITS directory',
+                        metavar = 'DIR',
+                        type = str,
+                        default = '/home/lacerda/CALIFA')
+    parser.add_argument('--rSEL', '-S',
+                        help = 'Remove Starlight Emission Lines ',
+                        metavar = 'MASK FILENAME',
+                        type = str,
+                        default = False)
+    parser.add_argument('--rFL', '-Q',
+                        help = 'Remove Flagged Lamdas',
+                        metavar = 'QUANTIL',
+                        type = float,
+                        default = 0.9)
 
-    if (remStarlightEmLines == True):
-        P.removeStarlightEmLines(maskfile)
+    return parser.parse_args()
+
+if __name__ == '__main__':
+    args = parser_args()
+
+    P = PCA.PCAlifa(califaID = args.califaID,
+                    fitsDir = args.fitsDir,
+                    flagLinesQuantil = args.rFL)
+
+    if args.rSEL:
+        P.removeStarlightEmLines(args.rSEL)
 
     P.PCA_obs_norm()
     P.tomograms_obs_norm()
@@ -96,7 +111,7 @@ if __name__ == '__main__':
     axArr[0, 5].set_title('eigenvector')
 
     plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
-    f.savefig('%s-corre_obs_norm_0-9.png' % califaID)
+    f.savefig('%s-corre_obs_norm_0-9.png' % P.K.califaID)
     plt.close()
 
 ############################### SYN NORM ###############################     
@@ -125,7 +140,7 @@ if __name__ == '__main__':
     axArr[0, 5].set_title('eigenvector')
 
     plt.suptitle('Correlations PC0 ... PC9 - SYN NORM')
-    f.savefig('%s-corre_syn_norm_0-9.png' % califaID)
+    f.savefig('%s-corre_syn_norm_0-9.png' % P.K.califaID)
     plt.close()
 
 ############################### SYN NORM ###############################     
@@ -154,7 +169,7 @@ if __name__ == '__main__':
     axArr[0, 5].set_title('eigenvector')
 
     plt.suptitle('Correlations PC0 ... PC9 - SYN NORM')
-    f.savefig('%s-corre_res_norm_0-9.png' % califaID)
+    f.savefig('%s-corre_res_norm_0-9.png' % P.K.califaID)
     plt.close()
 
 ############################### POP CORR ###############################
@@ -207,7 +222,7 @@ if __name__ == '__main__':
     axArr[0, 4].set_title('eigenvector')
 
     plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
-    f.savefig('%s-corre_obs_norm_popx_0-9.png' % califaID)
+    f.savefig('%s-corre_obs_norm_popx_0-9.png' % P.K.califaID)
     plt.close()
 
     ############################### SYN NORM ###############################
@@ -235,7 +250,7 @@ if __name__ == '__main__':
     axArr[0, 4].set_title('eigenvector')
 
     plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
-    f.savefig('%s-corre_syn_norm_popx_0-9.png' % califaID)
+    f.savefig('%s-corre_syn_norm_popx_0-9.png' % P.K.califaID)
     plt.close()
 
     ############################### SYN NORM ###############################
@@ -263,5 +278,5 @@ if __name__ == '__main__':
     axArr[0, 4].set_title('eigenvector')
 
     plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
-    f.savefig('%s-corre_res_norm_popx_0-9.png' % califaID)
+    f.savefig('%s-corre_res_norm_popx_0-9.png' % P.K.califaID)
     plt.close()

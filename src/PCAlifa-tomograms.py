@@ -12,14 +12,38 @@ import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 from matplotlib import pyplot as plt
 import PCAlifa as PCA
+import argparse as ap
 
-fitsDir = sys.argv[1]
-califaID = sys.argv[2]
-maskfile = '/home/lacerda/workspace/PCA/src/Mask.mC'
-flagLinesQuantil = 0.9
-remFlaggedLambdas = True
-remStarlightEmLines = False
-tmax = 20 # numero maximo de eigenvalues
+
+def parser_args():
+    parser = ap.ArgumentParser(description = 'PCAlifa - correlations')
+    parser.add_argument('--califaID', '-c',
+                        help = 'Califa ID (ex: K0277)',
+                        type = str,
+                        default = 'K0277')
+    parser.add_argument('--fitsDir', '-f',
+                        help = 'Califa FITS directory',
+                        metavar = 'DIR',
+                        type = str,
+                        default = '/home/lacerda/CALIFA')
+    parser.add_argument('--rSEL', '-S',
+                        help = 'Remove Starlight Emission Lines ',
+                        metavar = 'MASK FILENAME',
+                        type = str,
+                        default = False)
+    parser.add_argument('--rFL', '-Q',
+                        help = 'Remove Flagged Lamdas',
+                        metavar = 'QUANTIL',
+                        type = float,
+                        default = 0.9)
+    parser.add_argument('--tmax', '-t',
+                        help = 'Number max of eigenvectors to plot',
+                        metavar = 'INT',
+                        type = int,
+                        default = 20)
+
+    return parser.parse_args()
+
 
 def tomoPlot(tn, l, t, eigvec, eigval, npref):
     fig = plt.figure(figsize = (15, 5))
@@ -37,6 +61,7 @@ def tomoPlot(tn, l, t, eigvec, eigval, npref):
     fig.savefig('%stomo%02i.png' % (npref, tn))
     plt.close()
 
+
 def screeTestPlot(eigval, maxInd, npref):
     fig = plt.figure(figsize = (8, 6))
     eigval_norm = eigval / eigval.sum()
@@ -49,13 +74,14 @@ def screeTestPlot(eigval, maxInd, npref):
     plt.close()
 
 if __name__ == '__main__':
-    P = PCA.PCAlifa(califaID = califaID,
-                    fitsDir = fitsDir,
-                    flagLinesQuantil = flagLinesQuantil,
-                    remFlaggedLambdas = remFlaggedLambdas)
+    args = parser_args()
 
-    if (remStarlightEmLines == True):
-        P.removeStarlightEmLines(maskfile)
+    P = PCA.PCAlifa(califaID = args.califaID,
+                    fitsDir = args.fitsDir,
+                    flagLinesQuantil = args.rFL)
+
+    if args.rSEL:
+        P.removeStarlightEmLines(args.rSEL)
 
     P.runPCA()
 

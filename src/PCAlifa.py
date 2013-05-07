@@ -12,7 +12,7 @@ from scipy import linalg
 fitsDirDefault = '/home/lacerda/CALIFA'
 
 class PCAlifa:
-    def __init__(self, califaID, fitsDir = fitsDirDefault, flagLinesQuantil = 0.9, remFlaggedLambdas = True):
+    def __init__(self, califaID, fitsDir = fitsDirDefault, flagLinesQuantil = 0.9):
         self.histo = None
         self.tStarlight = None
         self.starlightMaskFile = None
@@ -23,11 +23,11 @@ class PCAlifa:
         self.K = fitsQ3DataCube(self.fitsFile)
         self.mask = np.ones_like(self.K.l_obs, dtype = np.bool)
         self.maskEmLines = self.mask
-        self.remFlaggedLambdas = remFlaggedLambdas
+        self.remFlaggedLambdas = False
 
         self.initVars()
 
-        if self.remFlaggedLambdas:
+        if self.flagLinesQuantil > 0.0:
             self.removeFlaggedLambda()
 
 

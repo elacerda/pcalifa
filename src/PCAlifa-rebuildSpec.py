@@ -12,24 +12,59 @@ import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 from matplotlib import pyplot as plt
 import PCAlifa as PCA
+import argparse as ap
 
-fitsDir = sys.argv[1]
-califaID = sys.argv[2]
-#fitsDir = '/home/lacerda/CALIFA'
-#califaID = 'K0277'
 
-maskfile = '/home/lacerda/workspace/PCA/src/Mask.mC'
-flagLinesQuantil = 0.9
-remFlaggedLambdas = True
-remStarlightEmLines = False
-tmax = 20 # numero maximo de eigenvalues
+def parser_args():
+    parser = ap.ArgumentParser(description = 'PCAlifa - correlations')
+    parser.add_argument('--califaID', '-c',
+                        help = 'Califa ID (ex: K0277)',
+                        type = str,
+                        default = 'K0277')
+    parser.add_argument('--fitsDir', '-f',
+                        help = 'Califa FITS directory',
+                        metavar = 'DIR',
+                        type = str,
+                        default = '/home/lacerda/CALIFA')
+    parser.add_argument('--rSEL', '-S',
+                        help = 'Remove Starlight Emission Lines ',
+                        metavar = 'MASK FILENAME',
+                        type = str,
+                        default = False)
+    parser.add_argument('--rFL', '-Q',
+                        help = 'Remove Flagged Lamdas',
+                        metavar = 'QUANTIL',
+                        type = float,
+                        default = 0.9)
+    parser.add_argument('--eigv', '-e',
+                        help = 'eigenvectors used to rebuild',
+                        type = int,
+                        nargs = '+',
+                        default = [1, 2, 3, 4, 5, 6, 10, 20])
+    parser.add_argument('--zones', '-z',
+                        help = 'The program will rebuild the spectrum of ZONES zones + last zone.',
+                        type = int,
+                        nargs = '+',
+                        default = [0, 10, 20, 100, 200])
+
+    return parser.parse_args()
+
+def parseArrArgs(args, lastZone):
+    args.eigvArr = np.array(args.eigv)
+    args.zones.append(lastZone)
+    args.zonesArr = np.array(args.zones)
 
 def zoneRebuildPlot(P, iZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, resid = False):
     i = 0
     nCols = 2
-    nRows = len(evRebArr) / nCols
+    nRows = len(evRebArr) / (1. * nCols)
+
+    if nRows > int(nRows):
+        nRows = nRows + 1
+
+    nRows = int(nRows)
+
     fig = plt.figure(figsize = (19.8, 10.8))
-    #plt.rcParams.update({'font.family': 'serif', 'text.usetex': True, 'backend': 'ps'})
     gs = gridspec.GridSpec(nRows, nCols, width_ratios = [1, 1], hspace = 0)
 
     adev = np.zeros_like(evRebArr, dtype = np.float64)
@@ -52,7 +87,7 @@ def zoneRebuildPlot(P, iZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, resid 
             ax.set_ylim([1.1 * O[iZone, :].min(), 1.1 * O[iZone, :].max()])
         else:
             ax.set_ylim([-0.5 * O[iZone, :].mean(), 1.5 * O[iZone, :].mean()])
-            adev[i] = 100. * (1. / P.K.N_zone) * (np.abs(diff) / O[iZone, :]).sum()
+            adev[i] = 100. * (1. / len(P.l_obs)) * (np.abs(diff) / O[iZone, :]).sum()
             textStrAdev = 'adev =  %.4f %% - ' % adev[i]
 
         textStr = '%ssigmaReb = %.2e - sigmaNReb = %.2e - ratio = %.4f' % (textStrAdev, sigmaReb, sigmaNReb, sigmaRatio)
@@ -85,33 +120,33 @@ def zoneRebuildPlot(P, iZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, resid 
 
     if (resid == False):
         fig = plt.figure(figsize = (19.8, 10.8))
-        plt.plot(evRebArr, adev, label = 'adev')
+        plt.plot(evRebArr, adev, 'o', label = 'adev')
         plt.legend()
         plt.xlabel('Number of eigenvectors')
         plt.ylabel('adev')
+        plt.grid()
         fig.savefig('%s-iZone-%04d-adev.png' % (nPref, iZone))
         plt.close()
 
 if __name__ == '__main__':
-    P = PCA.PCAlifa(califaID = califaID,
-                    fitsDir = fitsDir,
-                    flagLinesQuantil = flagLinesQuantil,
-                    remFlaggedLambdas = remFlaggedLambdas)
+    args = parser_args()
 
-    if (remStarlightEmLines == True):
-        P.removeStarlightEmLines(maskfile)
+    P = PCA.PCAlifa(califaID = args.califaID,
+                    fitsDir = args.fitsDir,
+                    flagLinesQuantil = args.rFL)
 
-    if (P.K.N_zone > 200):
-        zonesRebuild = np.array([0, 10, 20, 100, 200, P.K.N_zone - 1])
+    parseArrArgs(args, P.K.N_zone - 1)
 
-        for nZone in zonesRebuild:
-            eigvecRebuildArr = np.array([1, 2, 3, 4, 5, 6, 10, 20])
+    if args.rSEL:
+        P.removeStarlightEmLines(args.rSEL)
 
+    if (P.K.N_zone > args.zonesArr[-2]):
+        for nZone in args.zonesArr:
             P.PCA_obs()
             P.tomograms_obs()
 
             nPref = '%s-f_obs' % P.K.califaID
-            zoneRebuildPlot(P, nZone, eigvecRebuildArr, P.f_obs__zl,
+            zoneRebuildPlot(P, nZone, args.eigvArr, P.f_obs__zl,
                             P.tomo_obs__zk, P.eigVec_obs__lk,
                             P.eigVal_obs__k, P.ms_obs__l, nPref)
 
@@ -119,7 +154,7 @@ if __name__ == '__main__':
             P.tomograms_obs_norm()
 
             nPref = '%s-f_obs_norm' % P.K.califaID
-            zoneRebuildPlot(P, nZone, eigvecRebuildArr, P.f_obs_norm__zl,
+            zoneRebuildPlot(P, nZone, args.eigvArr, P.f_obs_norm__zl,
                             P.tomo_obs_norm__zk, P.eigVec_obs_norm__lk,
                             P.eigVal_obs_norm__k, P.ms_obs_norm__l, nPref)
 
@@ -127,7 +162,7 @@ if __name__ == '__main__':
             P.tomograms_syn()
 
             nPref = '%s-f_syn' % P.K.califaID
-            zoneRebuildPlot(P, nZone, eigvecRebuildArr, P.f_syn__zl,
+            zoneRebuildPlot(P, nZone, args.eigvArr, P.f_syn__zl,
                             P.tomo_syn__zk, P.eigVec_syn__lk,
                             P.eigVal_syn__k, P.ms_syn__l, nPref)
 
@@ -135,7 +170,7 @@ if __name__ == '__main__':
             P.tomograms_syn_norm()
 
             nPref = '%s-f_syn_norm' % P.K.califaID
-            zoneRebuildPlot(P, nZone, eigvecRebuildArr, P.f_syn_norm__zl,
+            zoneRebuildPlot(P, nZone, args.eigvArr, P.f_syn_norm__zl,
                             P.tomo_syn_norm__zk, P.eigVec_syn_norm__lk,
                             P.eigVal_syn_norm__k, P.ms_syn_norm__l, nPref)
 
@@ -143,7 +178,7 @@ if __name__ == '__main__':
             P.tomograms_res()
 
             nPref = '%s-f_res' % P.K.califaID
-            zoneRebuildPlot(P, nZone, eigvecRebuildArr, P.f_res__zl,
+            zoneRebuildPlot(P, nZone, args.eigvArr, P.f_res__zl,
                             P.tomo_res__zk, P.eigVec_res__lk,
                             P.eigVal_res__k, P.ms_res__l, nPref, resid = True)
 
@@ -151,8 +186,8 @@ if __name__ == '__main__':
             P.tomograms_res_norm()
 
             nPref = '%s-f_res_norm' % P.K.califaID
-            zoneRebuildPlot(P, nZone, eigvecRebuildArr, P.f_res_norm__zl,
+            zoneRebuildPlot(P, nZone, args.eigvArr, P.f_res_norm__zl,
                             P.tomo_res_norm__zk, P.eigVec_res_norm__lk,
                             P.eigVal_res_norm__k, P.ms_res_norm__l, nPref, resid = True)
     else:
-        print "%s N_Zone < 200" % P.K.califaID
+        print "%s N_Zone < %d" % (P.K.califaID, args.zonesArr[-2])
