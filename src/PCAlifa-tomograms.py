@@ -52,11 +52,12 @@ if __name__ == '__main__':
     P = PCA.PCAlifa(califaID = califaID,
                     fitsDir = fitsDir,
                     flagLinesQuantil = flagLinesQuantil,
-                    remFlaggedLambdas = remFlaggedLambdas,
-                    runDefaultPCA = True)
+                    remFlaggedLambdas = remFlaggedLambdas)
 
     if (remStarlightEmLines == True):
         P.removeStarlightEmLines(maskfile)
+
+    P.runPCA()
 
 #########################################################################
 ################################ f_obs ##################################

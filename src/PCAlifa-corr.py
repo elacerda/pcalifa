@@ -49,8 +49,7 @@ if __name__ == '__main__':
     P = PCA.PCAlifa(califaID = califaID,
                     fitsDir = fitsDir,
                     flagLinesQuantil = flagLinesQuantil,
-                    remFlaggedLambdas = remFlaggedLambdas,
-                    runDefaultPCA = False)
+                    remFlaggedLambdas = remFlaggedLambdas)
 
     if (remStarlightEmLines == True):
         P.removeStarlightEmLines(maskfile)
@@ -85,7 +84,7 @@ if __name__ == '__main__':
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
     f.subplots_adjust(hspace = 0.0)
-    f.subplots_adjust(wspace = 0.0)
+    f.subplots_adjust(wspace = 0.05)
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
@@ -114,7 +113,7 @@ if __name__ == '__main__':
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
     f.subplots_adjust(hspace = 0.0)
-    f.subplots_adjust(wspace = 0.0)
+    f.subplots_adjust(wspace = 0.05)
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
@@ -143,7 +142,7 @@ if __name__ == '__main__':
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
     f.subplots_adjust(hspace = 0.0)
-    f.subplots_adjust(wspace = 0.0)
+    f.subplots_adjust(wspace = 0.1)
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
@@ -197,7 +196,7 @@ if __name__ == '__main__':
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
     f.subplots_adjust(hspace = 0.0)
-    f.subplots_adjust(wspace = 0.0)
+    f.subplots_adjust(wspace = 0.05)
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
@@ -225,7 +224,7 @@ if __name__ == '__main__':
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
     f.subplots_adjust(hspace = 0.0)
-    f.subplots_adjust(wspace = 0.0)
+    f.subplots_adjust(wspace = 0.05)
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
@@ -253,7 +252,7 @@ if __name__ == '__main__':
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
     f.subplots_adjust(hspace = 0.0)
-    f.subplots_adjust(wspace = 0.0)
+    f.subplots_adjust(wspace = 0.05)
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
