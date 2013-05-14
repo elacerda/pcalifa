@@ -86,23 +86,13 @@ class PCAlifa:
 
         diff = arr - arrMean
         covMat = np.dot(diff.T, diff) / (num - 1.)
-        w, e = linalg.eig(covMat)
+        w, e = linalg.eigh(covMat)
 
         S = np.argsort(w)[::-1]
         wS = w[S]
         eS = e[:, S]
 
-        return diff, arrMean, covMat, np.real(wS), np.real(eS)
-
-    def PCAins(self, arr, num, axis = -1, arrMean = None):
-        if arrMean == None:
-            arrMean = arr.mean(axis = axis)
-
-        diff = arr - arrMean
-        covMat = np.dot(diff.T, diff) / (num - 1.)
-        w, e = linalg.eig(covMat)
-
-        return diff, arrMean, covMat, w, e
+        return diff, arrMean, covMat, wS, eS
 
     def delPCA(self):
         del self.I_obs__zl, self.ms_obs, self.covMat_obs__ll, self.eigVal_obs__k, self.eigVec_obs__lk
