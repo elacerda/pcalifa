@@ -194,8 +194,8 @@ class PCAlifa:
         self.mask = self.mask & self.maskEmLines
         self.initVars()
 
-    def rebuildSpectra(self, tomo, eigVec, mean, ne):
-        I_rec = np.dot(tomo[:, :ne], eigVec[:, :ne].transpose())
+    def rebuildSpectra(self, tomo, eigVec, mean):
+        I_rec = np.dot(tomo, eigVec.transpose())
         f_rec = I_rec + mean
 
         return I_rec, f_rec

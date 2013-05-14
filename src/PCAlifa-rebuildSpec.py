@@ -72,7 +72,7 @@ def zoneRebuildPlot(P, iZone, evRebArr, O, tomo, eVec, eVal, mean, nPref, resid 
     for i, ne in enumerate(evRebArr):
         ax = plt.subplot(gs[i])
 
-        I_reb__zl, M = P.rebuildSpectra(tomo, eVec, mean, ne)
+        I_reb__zl, M = P.rebuildSpectra(tomo[:, :ne], eVec[:, :ne], mean)
         diff = O[iZone, :] - M[iZone, :]
         sigmaNReb = 0.
         sigmaReb = np.sqrt(eVal[:ne].sum())
