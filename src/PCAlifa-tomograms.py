@@ -73,6 +73,7 @@ def screeTestPlot(eigval, maxInd, npref):
     fig.savefig('%sscree.png' % npref)
     plt.close()
 
+
 if __name__ == '__main__':
     args = parser_args()
 
