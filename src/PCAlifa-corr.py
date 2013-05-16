@@ -8,32 +8,8 @@ matplotlib.use('agg')
 
 import sys
 import numpy as np
-import scipy.stats as st
-from matplotlib import pyplot as plt
 import PCAlifa as PCA
 import argparse as ap
-
-def corrPlot(x, y, ax):
-        rhoPearson, pvalPearson = st.pearsonr(x, y)
-        rhoSpearman, pvalSpearman = st.spearmanr(x, y)
-        pTxt = 'p: %.2f' % rhoPearson
-        spTxt = 's: %.2f' % rhoSpearman
-        ax.plot(x, y, '.')
-        ax.text(0.95, 0.88, pTxt,
-                fontsize = 10, transform = ax.transAxes,
-                horizontalalignment = 'right',
-                verticalalignment = 'center',
-                multialignment = 'right',
-                weight = 'bold')
-        ax.text(0.95, 0.72, spTxt,
-                color = 'red',
-                fontsize = 10, transform = ax.transAxes,
-                horizontalalignment = 'right',
-                verticalalignment = 'center',
-                multialignment = 'right',
-                weight = 'bold')
-
-        plt.setp(ax.get_yticklabels(), visible = False)
 
 def parser_args():
     parser = ap.ArgumentParser(description = 'PCAlifa - correlations')
@@ -93,7 +69,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            corrPlot(colArr[j], P.tomo_obs_norm__zk[:, i], axArr[i, j])
+            P.corrPlot(colArr[j], P.tomo_obs_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_obs_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -122,7 +98,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            corrPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
+            P.corrPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_syn_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -151,7 +127,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            corrPlot(colArr[j], P.tomo_res_norm__zk[:, i], axArr[i, j])
+            P.corrPlot(colArr[j], P.tomo_res_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_res_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -205,7 +181,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            corrPlot(colArr[j], P.tomo_obs_norm__zk[:, i], axArr[i, j])
+            P.corrPlot(colArr[j], P.tomo_obs_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_obs_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -233,7 +209,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            corrPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
+            P.corrPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_syn_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -261,7 +237,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            corrPlot(colArr[j], P.tomo_res_norm__zk[:, i], axArr[i, j])
+            P.corrPlot(colArr[j], P.tomo_res_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_res_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
