@@ -9,7 +9,6 @@ import numpy as np
 import atpy
 from scipy import linalg
 import scipy.stats as st
-from canfarGrid import califaID
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 from matplotlib import pyplot as plt
