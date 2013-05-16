@@ -3,6 +3,9 @@ Created on 17/04/2013
 
 @author: lacerda
 '''
+import matplotlib
+matplotlib.use('agg')
+
 from pycasso.fitsdatacube import fitsQ3DataCube
 import pystarlight.io
 import numpy as np
@@ -36,8 +39,8 @@ class PCAlifa:
             if flagLinesQuantil:
                 self.removeFlaggedLambda(flagLinesQuantil)
 
-    def PCA(self, arr, num, axis = -1, arrMean = None):
-        if arrMean == None:
+    def PCA(self, arr, num, axis = -1, arrMean = False):
+        if not arrMean:
             arrMean = arr.mean(axis = axis)
 
         diff = arr - arrMean
@@ -219,88 +222,39 @@ class PCAlifa:
 
         return I_rec, f_rec
 
-    ''' 
-    TODO: 
-        adicionar P.l_obs na chamada da funcao em PCAlifa-rebuildSpec.py 
-    '''
-    def zoneRebuildPlot(self, iZone, evRebArr, l, O, tomo, eVec, eVal, mean, nPref, resid = False):
-        i = 0
-        nCols = 2
-        nRows = len(evRebArr) / (1. * nCols)
+    def plotAxisZoneRebuildSpec(self, ax, l, O, R, eVal, eVec, eVMask, npref, fontsize = 7, resid = False):
+        ''' criando uma string com os eigenvectors usados para reconstruir o cubo'''
+        res = O - R
+        adev = 100. * (1. / len(l)) * (np.abs(res) / O).sum()
 
-        if nRows > int(nRows):
-            nRows = nRows + 1
+        sigmaNReb = 0.
+        sigmaReb = np.sqrt(eVal[eVMask].sum())
 
-        nRows = int(nRows)
+        eVMask_not_used = np.asarray([not x for x in eVMask])
 
-        fig = plt.figure(figsize = (19.8, 10.8))
-        gs = gridspec.GridSpec(nRows, nCols, width_ratios = [1, 1], hspace = 0)
+        if eVMask_not_used.any():
+            sigmaNReb = np.sqrt(eVal[eVMask_not_used].sum())
 
-        adev = np.zeros_like(evRebArr, dtype = np.float64)
+        sigmaRatio = sigmaNReb / sigmaReb
 
-        for i, ne in enumerate(evRebArr):
-            ax = plt.subplot(gs[i])
+        textStrAdev = ''
 
-            I_reb__zl, M = self.rebuildSpectra(tomo[:, :ne], eVec[:, :ne], mean)
-            diff = O[iZone, :] - M[iZone, :]
-            sigmaNReb = 0.
-            sigmaReb = np.sqrt(eVal[:ne].sum())
+        if resid:
+            ax.set_ylim([1.1 * O.min(), 1.1 * O.max()])
+        else:
+            ax.set_ylim([-0.5 * O.mean(), 1.5 * O.mean()])
+            adev = 100. * (1. / len(l)) * (np.abs(res) / O).sum()
+            textStrAdev = 'adev =  %.4f %% - ' % adev
 
-            if (ne + 1 != len(eVec)):
-                sigmaNReb = np.sqrt(eVal[ne + 1:].sum())
+        textStr = '%ssigmaReb = %.2e - sigmaNReb = %.2e - ratio = %.4f' % (textStrAdev, sigmaReb, sigmaNReb, sigmaRatio)
 
-            sigmaRatio = sigmaNReb / sigmaReb
-            textStrAdev = ''
-
-            if (resid == True):
-                ax.set_ylim([1.1 * O[iZone, :].min(), 1.1 * O[iZone, :].max()])
-            else:
-                ax.set_ylim([-0.5 * O[iZone, :].mean(), 1.5 * O[iZone, :].mean()])
-                adev[i] = 100. * (1. / len(l)) * (np.abs(diff) / O[iZone, :]).sum()
-                textStrAdev = 'adev =  %.4f %% - ' % adev[i]
-
-            textStr = '%ssigmaReb = %.2e - sigmaNReb = %.2e - ratio = %.4f' % (textStrAdev, sigmaReb, sigmaNReb, sigmaRatio)
-
-            ax.plot(l, O[iZone, :], label = 'Obs')
-            ax.plot(l, M[iZone, :], label = 'Mod')
-            ax.plot(l, diff * 5., label = 'Res x 5')
-            ax.xaxis.set_major_locator(MaxNLocator(20))
-            ax.text(0.01, 0.92, textStr,
-                    fontsize = 10,
-                    transform = ax.transAxes,
-                    horizontalalignment = 'left',
-                    verticalalignment = 'center',
-                    multialignment = 'left')
-            ax.set_ylabel('using %d eigvec' % ne)
-            ax.legend(prop = {'size':7})
-            ax.grid()
-
-            if (i < len(evRebArr) - 2):
-                plt.setp(ax.get_xticklabels(), visible = False)
-            elif (i == len(evRebArr) - 2):
-                i = -1
-
-            i = i + 2
-
-        suptitle_txt = ''
-
-        if self.califaID:
-            suptitle_txt = 'CALIFA ID: %s%s' % (self.califaID, ' ' * 60)
-
-        plt.suptitle('%sZone %04d' % (suptitle_txt, iZone))
-        plt.tight_layout(pad = 2., w_pad = 0., h_pad = 0.)
-        fig.savefig('%s-iZone-%04d.png' % (nPref, iZone))
-        plt.close()
-
-        if (resid == False):
-            fig = plt.figure(figsize = (19.8, 10.8))
-            plt.plot(evRebArr, adev, 'o', label = 'adev')
-            plt.legend()
-            plt.xlabel('Number of eigenvectors')
-            plt.ylabel('adev')
-            plt.grid()
-            fig.savefig('%s-iZone-%04d-adev.png' % (nPref, iZone))
-            plt.close()
+        ax.plot(l, O, label = 'Obs')
+        ax.plot(l, R, label = 'Mod')
+        ax.plot(l, res, label = 'res')
+        ax.text(0.01, 0.92, textStr, fontsize = fontsize + 3, transform = ax.transAxes,
+                horizontalalignment = 'left', verticalalignment = 'center', multialignment = 'left')
+        ax.legend(prop = {'size' : fontsize})
+        ax.grid()
 
     def corrPlot(self, x, y, ax):
             rhoPearson, pvalPearson = st.pearsonr(x, y)
