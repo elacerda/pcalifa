@@ -18,6 +18,7 @@ from matplotlib import pyplot as plt
 
 fitsDirDefault = '/home/lacerda/CALIFA'
 quantilFlagDefault = 0.9
+fitsFilenameSuffix = '_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits'
 
 class PCAlifa:
     def __init__(self, califaID = False, fitsDir = fitsDirDefault, quantilQFlag = quantilFlagDefault, lc = []):
@@ -34,7 +35,7 @@ class PCAlifa:
 
         self.quantilQFlag = quantilQFlag
         self.fitsDir = fitsDir
-        self.fitsFile = '%s/%s/%s_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits' % (fitsDir, califaID, califaID)
+        self.fitsFile = '%s/%s/%s%s' % (fitsDir, califaID, califaID, fitsFilenameSuffix)
 
         self.K = fitsQ3DataCube(self.fitsFile)
 
