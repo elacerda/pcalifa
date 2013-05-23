@@ -22,7 +22,7 @@ quantilFlagDefault = 0.9
 class PCAlifa:
     def __init__(self, califaID = False, fitsDir = fitsDirDefault, quantilQFlag = quantilFlagDefault, lc = []):
         self.califaID = califaID
-        self.initVars()
+        self._initVars()
 
         if califaID:
             self.readCALIFACube(self.califaID, fitsDir, quantilQFlag, lc)
@@ -30,7 +30,7 @@ class PCAlifa:
     def readCALIFACube(self, califaID, fitsDir = fitsDirDefault, quantilQFlag = quantilFlagDefault, lc = []):
         self.califaID = califaID
 
-        self.initVars()
+        self._initVars()
 
         self.quantilQFlag = quantilQFlag
         self.fitsDir = fitsDir
@@ -42,7 +42,7 @@ class PCAlifa:
         self.maskQFlag = self.maskEmLines
         self.maskLambdaConstrains = self.maskEmLines
 
-        self.setVars()
+        self._setVars()
 
         if len(lc):
             self.setLambdaConstrains(lc)
@@ -115,22 +115,6 @@ class PCAlifa:
         self.tomograms_syn()
         self.tomograms_syn_norm()
 
-    def delPCA(self):
-        del self.I_obs__zl, self.ms_obs, self.covMat_obs__ll, self.eigVal_obs__k, self.eigVec_obs__lk
-        del self.I_obs_norm__zl, self.ms_obs_norm, self.covMat_obs_norm__ll, self.eigVal_obs_norm__k, self.eigVec_obs_norm__lk
-        del self.I_syn__zl, self.ms_syn, self.covMat_syn__ll, self.eigVal_syn__k, self.eigVec_syn__lk
-        del self.I_syn_norm__zl, self.ms_syn_norm, self.covMat_syn_norm__ll, self.eigVal_syn_norm__k, self.eigVec_syn_norm__lk
-        del self.I_res__zl, self.ms_res, self.covMat_res__ll, self.eigVal_res__k, self.eigVec_res__lk
-        del self.I_res_norm__zl, self.ms_res_norm, self.covMat_res_norm__ll, self.eigVal_res_norm__k, self.eigVec_res_norm__lk
-
-    def delTomograms(self):
-        del self.tomo_obs__zk, self.tomo_obs__kyx
-        del self.tomo_obs_norm_zk, self.tomo_obs_norm__kyx
-        del self.tomo_syn__zk, self.tomo_syn__kyx
-        del self.tomo_syn_norm__zk, self.tomo_syn_norm__kyx
-        del self.tomo_res__zk, self.tomo_res__kyx
-        del self.tomo_res_norm__zk, self.tomo_res_norm__kyx
-
     def tomogram(self, I, eigVec, extensive = True):
         t__zk = np.dot(I, eigVec)
         t__kyx = False
@@ -140,7 +124,7 @@ class PCAlifa:
 
         return t__zk, t__kyx
 
-    def setVars(self):
+    def _setVars(self):
         mask = self.maskEmLines & self.maskLambdaConstrains & self.maskQFlag
         self.l_obs = self.K.l_obs[mask]
         self.f_obs__zl = self.K.f_obs[mask].transpose()
@@ -150,7 +134,7 @@ class PCAlifa:
         self.f_res__zl = (self.K.f_obs[mask] - self.K.f_syn[mask]).transpose()
         self.f_res_norm__zl = ((self.K.f_obs[mask] - self.K.f_syn[mask]) / self.K.fobs_norm).transpose()
 
-    def initVars(self):
+    def _initVars(self):
         self.maskEmLines = []
         self.maskQFlag = []
         self.maskLambdaConstrains = []
@@ -223,23 +207,23 @@ class PCAlifa:
 
         self.maskLambdaConstrains = (self.K.l_obs > ldown) & (self.K.l_obs < lup)
 
-        self.setVars()
+        self._setVars()
 
     def unsetLambdaConstrains(self):
         self.maskLambdaConstrains = np.ones_like(self.K.l_obs, dtype = np.bool)
-        self.setVars()
+        self._setVars()
 
     def setQFlag(self, quantil):
         self.quantilQFlag = quantil
         self.histo = self.K.f_flag.sum(axis = 1) / self.K.N_zone
         self.maskQFlag = (self.histo < quantil)
-        self.setVars()
+        self._setVars()
 
     def unsetQFlag(self):
         self.quantilQFlag = False
         self.histo = False
         self.maskQFlag = np.ones_like(self.K.l_obs, dtype = np.bool)
-        self.setVars()
+        self._setVars()
 
     def setStarlightMaskFile(self, maskFile):
         self.starlightMaskFile = maskFile
@@ -252,14 +236,14 @@ class PCAlifa:
 
         self.tStarlight = t
         self.maskEmLines = mask
-        self.setVars()
+        self._setVars()
 
     def unsetStarlightMaskFile(self):
         self.starlightMaskFile = None
         del self.tStarlight
         self.tStarlight = None
         self.maskEmLines = np.ones_like(self.K.l_obs, dtype = np.bool)
-        self.setVars()
+        self._setVars()
 
     def rebuildSpectra(self, tomo, eigVec, mean):
         I_rec = np.dot(tomo, eigVec.transpose())
