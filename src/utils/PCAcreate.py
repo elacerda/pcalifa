@@ -213,7 +213,7 @@ if __name__ == '__main__':
                                 type = 'starlightv4_base',
                                 read_basedir = True)
 
-    gal = galaxy(side = 51, base = PadovaSalp2000, rint = 5., rpop = 5.)
+    gal = galaxy(side = 51, base = PadovaSalp2000, rint = 5., rpop = 100.)
 
     ''' NOW Do what u want with GAL ;-) '''
 
@@ -253,7 +253,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            P.corrPlot(colArr[j], tomo__ik[:, i][by_radius], axArr[i, j])
+            P.correlationAxisPlot(colArr[j], tomo__ik[:, i][by_radius], axArr[i, j])
 
         axArr[i, nCols - 1].plot(gal.l, eigVec__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -293,7 +293,7 @@ if __name__ == '__main__':
         f = plt.figure(figsize = (19.8, 10.8))
         ax = f.gca()
 
-        P.plotAxisZoneRebuildSpec(ax, gal.l, gal.f__il[i, :], f_reconstr__il[i, :],
+        P.zoneRebuildSpecAxisPlot(ax, gal.l, gal.f__il[i, :], f_reconstr__il[i, :],
                                   eigVal__k, eigVec__lk, mask, npref, resid = False)
 
         f.savefig('%s_eVec-%s_rebSpec.png' % (npref, eigVecUsedStr.replace(' ', '-')))
@@ -320,7 +320,7 @@ if __name__ == '__main__':
         f = plt.figure(figsize = (19.8, 10.8))
         ax = f.gca()
 
-        P.plotAxisZoneRebuildSpec(ax, gal.l, gal.f__il[i, :], f_reconstr__il[i, :],
+        P.zoneRebuildSpecAxisPlot(ax, gal.l, gal.f__il[i, :], f_reconstr__il[i, :],
                                   eigVal__k, eigVec__lk, mask, npref, resid = False)
 
         ax.set_ylabel('PC %s' % eigVecUsedStr)
@@ -348,7 +348,7 @@ if __name__ == '__main__':
         f = plt.figure(figsize = (19.8, 10.8))
         ax = f.gca()
 
-        P.plotAxisZoneRebuildSpec(ax, gal.l, gal.f__il[i, :], f_reconstr__il[i, :],
+        P.zoneRebuildSpecAxisPlot(ax, gal.l, gal.f__il[i, :], f_reconstr__il[i, :],
                                   eigVal__k, eigVec__lk, mask, npref, resid = False)
 
         f.savefig('%s_eVec-%s_rebSpec.png' % (npref, eigVecUsedStr.replace(' ', '-')))

@@ -44,6 +44,12 @@ def parser_args():
                         type = int,
                         nargs = '+',
                         default = [0, 10, 20, 100, 200])
+    parser.add_argument('--lc', '-l',
+                        help = 'Lambda constrains',
+                        metavar = 'LAMBDA',
+                        type = int,
+                        nargs = 2,
+                        default = [3800, 6850])
 
     return parser.parse_args()
 
@@ -75,7 +81,7 @@ def zoneRebuildSpec(iZone, evRebArr, l, O, tomo, eVec, eVal, mean, nPref, resid 
 
         ax = plt.subplot(gs[i])
 
-        P.plotAxisZoneRebuildSpec(ax, l, O[iZone, :], f_reconstr__il[iZone, :],
+        P.zoneRebuildSpecAxisPlot(ax, l, O[iZone, :], f_reconstr__il[iZone, :],
                                   eVal, eVec, eVMask, nPref, 7, resid)
 
         if (i < len(evRebArr) - 2):
@@ -89,15 +95,13 @@ def zoneRebuildSpec(iZone, evRebArr, l, O, tomo, eVec, eVal, mean, nPref, resid 
 
     plt.suptitle('CALIFA ID: %s%sZone %04d' % (nPref[:5], ' ' * 60, iZone))
     plt.tight_layout(pad = 2., w_pad = 0., h_pad = 0.)
-    fig.savefig('%s-iZone-%04d.png' % (nPref, iZone))
+    fig.savefig('%s_zone_%04d.png' % (nPref, iZone))
     plt.close()
 
 if __name__ == '__main__':
     args = parser_args()
 
-    P = PCA.PCAlifa(califaID = args.califaID,
-                    fitsDir = args.fitsDir,
-                    flagLinesQuantil = args.rFL)
+    P = PCA.PCAlifa(args.califaID, args.fitsDir, args.rFL, args.lc)
 
     parseArrArgs(args, P.K.N_zone - 1)
 

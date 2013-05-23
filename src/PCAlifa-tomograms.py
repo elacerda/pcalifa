@@ -41,15 +41,19 @@ def parser_args():
                         metavar = 'INT',
                         type = int,
                         default = 20)
+    parser.add_argument('--lc', '-l',
+                        help = 'Lambda constrains',
+                        metavar = 'LAMBDA',
+                        type = int,
+                        nargs = 2,
+                        default = [3800, 6850])
 
     return parser.parse_args()
 
 if __name__ == '__main__':
     args = parser_args()
 
-    P = PCA.PCAlifa(califaID = args.califaID,
-                    fitsDir = args.fitsDir,
-                    flagLinesQuantil = args.rFL)
+    P = PCA.PCAlifa(args.califaID, args.fitsDir, args.rFL, args.lc)
 
     if args.rSEL:
         P.removeStarlightEmLines(args.rSEL)
@@ -60,7 +64,7 @@ if __name__ == '__main__':
 ################################ f_obs ##################################
 #########################################################################
 
-    npref = '%s_f_obs_' % P.K.califaID
+    npref = '%s-f_obs_' % P.K.califaID
 
     P.screeTestPlot(P.eigVal_obs__k, args.tmax, npref)
 
@@ -71,7 +75,7 @@ if __name__ == '__main__':
 ########################### f_obs_norm #################################
 ########################################################################
 
-    npref = '%s_f_obs_norm_' % P.K.califaID
+    npref = '%s-f_obs_norm_' % P.K.califaID
 
     P.screeTestPlot(P.eigVal_obs_norm__k, args.tmax, npref)
 
@@ -82,7 +86,7 @@ if __name__ == '__main__':
 ############################# f_syn ####################################
 ########################################################################
 
-    npref = '%s_f_syn_' % P.K.califaID
+    npref = '%s-f_syn_' % P.K.califaID
 
     P.screeTestPlot(P.eigVal_syn__k, args.tmax, npref)
 
@@ -93,7 +97,7 @@ if __name__ == '__main__':
 ########################### f_syn_norm #################################
 ########################################################################
 
-    npref = '%s_f_syn_norm_' % P.K.califaID
+    npref = '%s-f_syn_norm_' % P.K.califaID
 
     P.screeTestPlot(P.eigVal_syn_norm__k, args.tmax, npref)
 
@@ -104,7 +108,7 @@ if __name__ == '__main__':
 ############################### f_res ##################################
 ########################################################################
 
-    npref = '%s_f_res_' % P.K.califaID
+    npref = '%s-f_res_' % P.K.califaID
 
     P.screeTestPlot(P.eigVal_res__k, args.tmax, npref)
 
@@ -115,7 +119,7 @@ if __name__ == '__main__':
 ############################# f_res_norm ###############################
 ########################################################################
 
-    npref = '%s_f_res_norm_' % P.K.califaID
+    npref = '%s-f_res_norm_' % P.K.califaID
 
     P.screeTestPlot(P.eigVal_res_norm__k, args.tmax, npref)
 

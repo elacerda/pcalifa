@@ -10,6 +10,7 @@ import sys
 import numpy as np
 import PCAlifa as PCA
 import argparse as ap
+from matplotlib import pyplot as plt
 
 def parser_args():
     parser = ap.ArgumentParser(description = 'PCAlifa - correlations')
@@ -32,15 +33,19 @@ def parser_args():
                         metavar = 'QUANTIL',
                         type = float,
                         default = 0.9)
+    parser.add_argument('--lc', '-l',
+                        help = 'Lambda constrains',
+                        metavar = 'LAMBDA',
+                        type = int,
+                        nargs = 2,
+                        default = [3800, 6850])
 
     return parser.parse_args()
 
 if __name__ == '__main__':
     args = parser_args()
 
-    P = PCA.PCAlifa(califaID = args.califaID,
-                    fitsDir = args.fitsDir,
-                    flagLinesQuantil = args.rFL)
+    P = PCA.PCAlifa(args.califaID, args.fitsDir, args.rFL, args.lc)
 
     if args.rSEL:
         P.removeStarlightEmLines(args.rSEL)
@@ -69,7 +74,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            P.corrPlot(colArr[j], P.tomo_obs_norm__zk[:, i], axArr[i, j])
+            P.correlationAxisPlot(colArr[j], P.tomo_obs_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_obs_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -98,7 +103,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            P.corrPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
+            P.correlationAxisPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_syn_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -127,7 +132,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            P.corrPlot(colArr[j], P.tomo_res_norm__zk[:, i], axArr[i, j])
+            P.correlationAxisPlot(colArr[j], P.tomo_res_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_res_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -181,7 +186,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            P.corrPlot(colArr[j], P.tomo_obs_norm__zk[:, i], axArr[i, j])
+            P.correlationAxisPlot(colArr[j], P.tomo_obs_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_obs_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -209,7 +214,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            P.corrPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
+            P.correlationAxisPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_syn_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
@@ -237,7 +242,7 @@ if __name__ == '__main__':
         axArr[i, 0].set_ylabel('PC%d' % i)
 
         for j in range(nCols)[:-1]:
-            P.corrPlot(colArr[j], P.tomo_res_norm__zk[:, i], axArr[i, j])
+            P.correlationAxisPlot(colArr[j], P.tomo_res_norm__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_res_norm__lk[:, i])
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)

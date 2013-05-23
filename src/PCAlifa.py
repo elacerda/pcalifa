@@ -17,27 +17,38 @@ from matplotlib.ticker import MaxNLocator
 from matplotlib import pyplot as plt
 
 fitsDirDefault = '/home/lacerda/CALIFA'
+quantilFlagDefault = 0.9
 
 class PCAlifa:
-    def __init__(self, califaID = False, fitsDir = fitsDirDefault, flagLinesQuantil = 0.9):
-        self.histo = None
-        self.tStarlight = None
-        self.starlightMaskFile = None
+    def __init__(self, califaID = False, fitsDir = fitsDirDefault, quantilQFlag = quantilFlagDefault, lc = []):
         self.califaID = califaID
         self.initVars()
 
         if califaID:
-            self.flagLinesQuantil = flagLinesQuantil
-            self.fitsDir = fitsDir
-            self.fitsFile = '%s/%s/%s_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits' % (fitsDir, califaID, califaID)
-            self.K = fitsQ3DataCube(self.fitsFile)
-            self.mask = np.ones_like(self.K.l_obs, dtype = np.bool)
-            self.maskEmLines = self.mask
+            self.readCALIFACube(self.califaID, fitsDir, quantilQFlag, lc)
 
-            self.setVars()
+    def readCALIFACube(self, califaID, fitsDir = fitsDirDefault, quantilQFlag = quantilFlagDefault, lc = []):
+        self.califaID = califaID
 
-            if flagLinesQuantil:
-                self.removeFlaggedLambda(flagLinesQuantil)
+        self.initVars()
+
+        self.quantilQFlag = quantilQFlag
+        self.fitsDir = fitsDir
+        self.fitsFile = '%s/%s/%s_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits' % (fitsDir, califaID, califaID)
+
+        self.K = fitsQ3DataCube(self.fitsFile)
+
+        self.maskEmLines = np.ones_like(self.K.l_obs, dtype = np.bool)
+        self.maskQFlag = self.maskEmLines
+        self.maskLambdaConstrains = self.maskEmLines
+
+        self.setVars()
+
+        if len(lc):
+            self.setLambdaConstrains(lc)
+
+        if quantilQFlag:
+            self.setQFlag(quantilQFlag)
 
     def PCA(self, arr, num, axis = -1, arrMean = False):
         if not arrMean:
@@ -130,15 +141,24 @@ class PCAlifa:
         return t__zk, t__kyx
 
     def setVars(self):
-        self.l_obs = self.K.l_obs[self.mask]
-        self.f_obs__zl = self.K.f_obs[self.mask].transpose()
-        self.f_obs_norm__zl = (self.K.f_obs[self.mask] / self.K.fobs_norm).transpose()
-        self.f_syn__zl = self.K.f_syn[self.mask].transpose()
-        self.f_syn_norm__zl = (self.K.f_syn[self.mask] / self.K.fobs_norm).transpose()
-        self.f_res__zl = (self.K.f_obs[self.mask] - self.K.f_syn[self.mask]).transpose()
-        self.f_res_norm__zl = ((self.K.f_obs[self.mask] - self.K.f_syn[self.mask]) / self.K.fobs_norm).transpose()
+        mask = self.maskEmLines & self.maskLambdaConstrains & self.maskQFlag
+        self.l_obs = self.K.l_obs[mask]
+        self.f_obs__zl = self.K.f_obs[mask].transpose()
+        self.f_obs_norm__zl = (self.K.f_obs[mask] / self.K.fobs_norm).transpose()
+        self.f_syn__zl = self.K.f_syn[mask].transpose()
+        self.f_syn_norm__zl = (self.K.f_syn[mask] / self.K.fobs_norm).transpose()
+        self.f_res__zl = (self.K.f_obs[mask] - self.K.f_syn[mask]).transpose()
+        self.f_res_norm__zl = ((self.K.f_obs[mask] - self.K.f_syn[mask]) / self.K.fobs_norm).transpose()
 
     def initVars(self):
+        self.maskEmLines = []
+        self.maskQFlag = []
+        self.maskLambdaConstrains = []
+
+        self.histo = False
+        self.tStarlight = False
+        self.starlightMaskFile = False
+
         self.l_obs = False
         self.f_obs__zl = False
         self.f_obs_norm__zl = False
@@ -195,14 +215,33 @@ class PCAlifa:
         self.tomo_res_norm__zk = False
         self.tomo_res_norm__kyx = False
 
-    def removeFlaggedLambda(self, quantil):
-        self.flagLinesQuantil = quantil
-        self.histo = self.K.f_flag.sum(axis = 1) / self.K.N_zone
-        self.maskHisto = (self.histo < quantil)
-        self.mask = self.maskHisto & (self.K.l_obs > 3800) & (self.K.l_obs < 6850)
+    def setLambdaConstrains(self, lc):
+        lc = np.array(lc)
+        s = np.argsort(lc)
+        ldown = lc[s][0]
+        lup = lc[s][1]
+
+        self.maskLambdaConstrains = (self.K.l_obs > ldown) & (self.K.l_obs < lup)
+
         self.setVars()
 
-    def removeStarlightEmLines(self, maskFile):
+    def unsetLambdaConstrains(self):
+        self.maskLambdaConstrains = np.ones_like(self.K.l_obs, dtype = np.bool)
+        self.setVars()
+
+    def setQFlag(self, quantil):
+        self.quantilQFlag = quantil
+        self.histo = self.K.f_flag.sum(axis = 1) / self.K.N_zone
+        self.maskQFlag = (self.histo < quantil)
+        self.setVars()
+
+    def unsetQFlag(self):
+        self.quantilQFlag = False
+        self.histo = False
+        self.maskQFlag = np.ones_like(self.K.l_obs, dtype = np.bool)
+        self.setVars()
+
+    def setStarlightMaskFile(self, maskFile):
         self.starlightMaskFile = maskFile
         t = atpy.Table(maskfile = maskFile, type = 'starlight_mask')
         mask = (self.K.l_obs > t[0]['l_up'])
@@ -213,7 +252,13 @@ class PCAlifa:
 
         self.tStarlight = t
         self.maskEmLines = mask
-        self.mask = self.mask & self.maskEmLines
+        self.setVars()
+
+    def unsetStarlightMaskFile(self):
+        self.starlightMaskFile = None
+        del self.tStarlight
+        self.tStarlight = None
+        self.maskEmLines = np.ones_like(self.K.l_obs, dtype = np.bool)
         self.setVars()
 
     def rebuildSpectra(self, tomo, eigVec, mean):
@@ -222,7 +267,7 @@ class PCAlifa:
 
         return I_rec, f_rec
 
-    def plotAxisZoneRebuildSpec(self, ax, l, O, R, eVal, eVec, eVMask, npref, fontsize = 7, resid = False):
+    def zoneRebuildSpecAxisPlot(self, ax, l, O, R, eVal, eVec, eVMask, npref, fontsize = 7, resid = False):
         ''' criando uma string com os eigenvectors usados para reconstruir o cubo'''
         res = O - R
         adev = 100. * (1. / len(l)) * (np.abs(res) / O).sum()
@@ -256,7 +301,7 @@ class PCAlifa:
         ax.legend(prop = {'size' : fontsize})
         ax.grid()
 
-    def corrPlot(self, x, y, ax):
+    def correlationAxisPlot(self, x, y, ax):
             rhoPearson, pvalPearson = st.pearsonr(x, y)
             rhoSpearman, pvalSpearman = st.spearmanr(x, y)
             pTxt = 'p: %.2f' % rhoPearson
@@ -291,7 +336,7 @@ class PCAlifa:
         ax2.xaxis.set_major_locator(MaxNLocator(20))
         ax2.grid()
         plt.tight_layout()
-        fig.savefig('%stomo%02i.png' % (npref, tn))
+        fig.savefig('%stomo_%02i.png' % (npref, tn))
         plt.close()
 
     def screeTestPlot(self, eigval, maxInd, npref):
