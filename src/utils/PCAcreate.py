@@ -3,7 +3,7 @@ Created on 14/05/2013
 
 @author: lacerda
 '''
-import PCAlifa as pca
+import PCAlifa as PCA
 import pystarlight.io
 import numpy as np
 import atpy
@@ -219,8 +219,7 @@ if __name__ == '__main__':
 
 ##########################################################
     ''' PCA with GAL :P '''
-
-    P = pca.PCAlifa()
+    P = PCA.PCAlifa()
 
     I__il, ms__l, covMat__ll, eigVal__k, eigVec__lk = P.PCA(gal.f__il, gal.nl, 0)
     ''' TOMO_KYX nao eh calculado pois nao existe P.K.ZoneToYX.'''
@@ -229,11 +228,8 @@ if __name__ == '__main__':
     tomo__kyx = tomo__ik.reshape(gal.side, gal.side, -1).T
 
     ''' plotando os 5 primeiros tomogramas e autoespectros '''
-    P.tomoPlot(0, gal.l, tomo__kyx, eigVec__lk, eigVal__k, 'GalPadSalp2000_')
-    P.tomoPlot(1, gal.l, tomo__kyx, eigVec__lk, eigVal__k, 'GalPadSalp2000_')
-    P.tomoPlot(2, gal.l, tomo__kyx, eigVec__lk, eigVal__k, 'GalPadSalp2000_')
-    P.tomoPlot(3, gal.l, tomo__kyx, eigVec__lk, eigVal__k, 'GalPadSalp2000_')
-    P.tomoPlot(4, gal.l, tomo__kyx, eigVec__lk, eigVal__k, 'GalPadSalp2000_')
+    for ti in range(5):
+        P.tomoPlot(tomo__kyx, gal.l, eigVec__lk, eigVal__k, ti, 'GalPadSalp2000_')
 
     ''' correlacoes '''
     by_radius = np.argsort(gal.r)

@@ -68,8 +68,8 @@ if __name__ == '__main__':
 
     P.screeTestPlot(P.eigVal_obs__k, args.tmax, npref)
 
-    for tn in range(args.tmax):
-        P.tomoPlot(tn, P.l_obs, P.tomo_obs__kyx, P.eigVec_obs__lk, P.eigVal_obs__k, npref)
+    for ti in range(args.tmax):
+        P.tomoPlot(P.tomo_obs__kyx, P.l_obs, P.eigVec_obs__lk, P.eigVal_obs__k, ti, npref)
 
 ########################################################################
 ########################### f_obs_norm #################################
@@ -79,8 +79,8 @@ if __name__ == '__main__':
 
     P.screeTestPlot(P.eigVal_obs_norm__k, args.tmax, npref)
 
-    for tn in range(args.tmax):
-        P.tomoPlot(tn, P.l_obs, P.tomo_obs_norm__kyx, P.eigVec_obs_norm__lk, P.eigVal_obs_norm__k, npref)
+    for ti in range(args.tmax):
+        P.tomoPlot(P.tomo_obs_norm__kyx, P.l_obs, P.eigVec_obs_norm__lk, P.eigVal_obs_norm__k, ti, npref)
 
 ########################################################################
 ############################# f_syn ####################################
@@ -90,8 +90,8 @@ if __name__ == '__main__':
 
     P.screeTestPlot(P.eigVal_syn__k, args.tmax, npref)
 
-    for tn in range(args.tmax):
-        P.tomoPlot(tn, P.l_obs, P.tomo_syn__kyx, P.eigVec_syn__lk, P.eigVal_syn__k, npref)
+    for ti in range(args.tmax):
+        P.tomoPlot(P.tomo_syn__kyx, P.l_obs, P.eigVec_syn__lk, P.eigVal_syn__k, ti, npref)
 
 ########################################################################
 ########################### f_syn_norm #################################
@@ -101,8 +101,8 @@ if __name__ == '__main__':
 
     P.screeTestPlot(P.eigVal_syn_norm__k, args.tmax, npref)
 
-    for tn in range(args.tmax):
-        P.tomoPlot(tn, P.l_obs, P.tomo_syn_norm__kyx, P.eigVec_syn_norm__lk, P.eigVal_syn_norm__k, npref)
+    for ti in range(args.tmax):
+        P.tomoPlot(P.tomo_syn_norm__kyx, P.l_obs, P.eigVec_syn_norm__lk, P.eigVal_syn_norm__k, ti, npref)
 
 ########################################################################
 ############################### f_res ##################################
@@ -112,8 +112,8 @@ if __name__ == '__main__':
 
     P.screeTestPlot(P.eigVal_res__k, args.tmax, npref)
 
-    for tn in range(args.tmax):
-        P.tomoPlot(tn, P.l_obs, P.tomo_res__kyx, P.eigVec_res__lk, P.eigVal_res__k, npref)
+    for ti in range(args.tmax):
+        P.tomoPlot(P.tomo_res__kyx, P.l_obs, P.eigVec_res__lk, P.eigVal_res__k, ti, npref)
 
 ########################################################################
 ############################# f_res_norm ###############################
@@ -123,5 +123,5 @@ if __name__ == '__main__':
 
     P.screeTestPlot(P.eigVal_res_norm__k, args.tmax, npref)
 
-    for tn in range(args.tmax):
-        P.tomoPlot(tn, P.l_obs, P.tomo_res_norm__kyx, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, npref)
+    for ti in range(args.tmax):
+        P.tomoPlot(P.tomo_res_norm__kyx, P.l_obs, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, ti, npref)

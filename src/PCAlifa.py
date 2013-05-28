@@ -307,20 +307,24 @@ class PCAlifa:
 
             plt.setp(ax.get_yticklabels(), visible = False)
 
-    def tomoPlot(self, tn, l, t, eigvec, eigval, npref):
+    def tomoPlot(self, t, l, eigvec, eigval, ti, npref):
+        tomogram = t[ti, :, :]
+        x = l
+        y = eigvec[:, ti]
+
         fig = plt.figure(figsize = (15, 5))
         gs = gridspec.GridSpec(1, 2, width_ratios = [4, 7])
         ax1 = plt.subplot(gs[0])
         ax2 = plt.subplot(gs[1])
-        ax1.set_title('tomogram %02i' % tn)
-        im = ax1.imshow(t[tn, :, :], origin = 'lower', interpolation = 'nearest', aspect = 'auto')
+        ax1.set_title('tomogram %02i' % ti)
+        im = ax1.imshow(tomogram, origin = 'lower', interpolation = 'nearest', aspect = 'auto')
         fig.colorbar(ax = ax1, mappable = im, use_gridspec = True)
-        ax2.set_title('eigval %.4e' % eigval[tn])
-        ax2.plot(l, eigvec[:, tn])
+        ax2.set_title('eigval %.4e' % eigval[ti])
+        ax2.plot(x, y)
         ax2.xaxis.set_major_locator(MaxNLocator(20))
         ax2.grid()
         plt.tight_layout()
-        fig.savefig('%stomo_%02i.png' % (npref, tn))
+        fig.savefig('%stomo_%02i.png' % (npref, ti))
         plt.close()
 
     def screeTestPlot(self, eigval, maxInd, npref):
