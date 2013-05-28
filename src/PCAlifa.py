@@ -5,16 +5,15 @@ Created on 17/04/2013
 '''
 import matplotlib
 matplotlib.use('agg')
-
-from pycasso.fitsdatacube import fitsQ3DataCube
-import pystarlight.io
 import numpy as np
 import atpy
+from pycasso.fitsdatacube import fitsQ3DataCube
+from pystarlight import io
 from scipy import linalg
-import scipy.stats as st
-import matplotlib.gridspec as gridspec
-from matplotlib.ticker import MaxNLocator
+from scipy import stats as st
+from matplotlib import gridspec
 from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 fitsDirDefault = '/home/lacerda/CALIFA'
 quantilFlagDefault = 0.9
