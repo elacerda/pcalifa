@@ -126,21 +126,19 @@ class ssp:
 class galaxy:
     ''' 
         coordenadas imagem: 
-        y = linha
-        x = coluna
-        i = indice pixel 
+            y = linha
+            x = coluna
+            i = indice pixel 
         imagem armazenada como um vetor com SIDE * SIDE posicoes 
     '''
-    def __init__(self, base, side = 1, rpop = 0., rint = 0., rdust = 0., Xy0 = 0., Xo0 = 0., Iint0 = 0., tauV0 = 0., extLawFile = False):
+    def __init__(self, base, side = 1, rpop = 0., rint = 0., rdust = 0., Xo0 = 0., tauV0 = 0., extLawFile = False):
         self.init = True
 
-        self.rpop = rpop
-        self.rint = rint
-        self.rdus = rdust
-        self.Xy0 = Xy0
-        self.Xo0 = Xo0
-        self.Iint0 = Iint0
-        self.tauV0 = tauV0
+#        self.rpop = rpop
+#        self.rint = rint
+#        self.rdus = rdust
+#        self.Xo0 = Xo0
+#        self.tauV0 = tauV0
 
         self.init_vars()
 
@@ -152,7 +150,7 @@ class galaxy:
             self.set_base(base, lc)
 
             ''' calcula o vetor populacao(raio) usando como variavel controle RPOP '''
-            self.set_rpop(rpop)
+            self.set_rpop(rpop, Xo0)
 
             ''' calcula o vetor de intensidades(raio) usando como variavel controle RINT '''
             self.set_rint(rint)
@@ -161,27 +159,9 @@ class galaxy:
             self.set_rdust(rdust, tauV0, extLawFile)
 
             ''' calcula todos os espectros da galaxia  '''
-            self.set_f(Xy0, Xo0, Iint0, tauV0)
+            self.set_f()
 
         self.init = False
-
-    def set_side(self, side):
-        if side == 0:
-            side = 1
-
-        self.side = side
-        ''' num de elementos '''
-        self.n = np.int(self.side ** 2.)
-        ''' acerta as coordenadas do nucleo para o centro do vetor'''
-        self.set_nucleus_coords(self.n / 2)
-
-        ''' garantindo que o lado tenha tamanho impar '''
-        if not (self.side % 2):
-            self.side = side + 1
-            print 'galaxy: new cube side: %d' % self.side
-
-        ''' calcula o raio de cada posicao xy'''
-        self.set_radius()
 
     def init_vars(self):
         self.extLaw = False
@@ -199,6 +179,26 @@ class galaxy:
         self.q_CCM__l = False
         self.r__i = False
 
+    def set_side(self, side):
+        if side == 0:
+            side = 1
+
+        self.side = side
+
+        ''' num de elementos '''
+        self.n = np.int(self.side ** 2.)
+
+        ''' acerta as coordenadas do nucleo para o centro do vetor'''
+        self.set_nucleus_coords(self.n / 2)
+
+        ''' garantindo que o lado tenha tamanho impar '''
+        if not (self.side % 2):
+            self.side = side + 1
+            print 'galaxy: new cube side: %d' % self.side
+
+        ''' calcula o raio de cada posicao xy'''
+        self.set_radius()
+
     def set_nucleus_coords(self, i):
         self.i_nuc = i
         self.nuc_y, self.nuc_x = self.get_coords(self.i_nuc)
@@ -207,17 +207,7 @@ class galaxy:
             self.set_radius()
 
             if (self.extLaw):
-                self.set_rpop(self.rpop)
-
-    def set_base(self, base, lc = [3800, 6850]):
-        self.base = ssp(base, lc)
-        self.fyoung_norm__l = self.base.f_young_norm
-        self.fold_norm__l = self.base.f_old_norm
-        self.l = self.base.l_ssp
-        self.nl = len(self.l)
-
-        ''' matriz com 1 em todas as posicoes com dimensao nl x n '''
-        self.dim__li = np.ones((self.nl, self.n))
+                self.set_rpop(self.rpop, self.Xo0)
 
     def set_radius(self, norm = False):
         self.r_norm = norm
@@ -232,18 +222,34 @@ class galaxy:
             else:
                 self.r__i = self.r__i / self.r__i.sum()
 
-    def set_rpop(self, rpop):
+    def set_base(self, base, lc = [3800, 6850]):
+        self.base = ssp(base, lc)
+        self.fyoung_norm__l = self.base.f_young_norm
+        self.fold_norm__l = self.base.f_old_norm
+        self.l = self.base.l_ssp
+        self.nl = len(self.l)
+
+        ''' matriz com 1 em todas as posicoes com dimensao nl x n '''
+        self.dim__li = np.ones((self.nl, self.n))
+
+        if not self.init:
+            self.set_rpop(self.rpop, self.Xo0)
+            self.set_rint(self.rint)
+            self.set_rdust(self.rdust, self.tauV0)
+            self.set_f()
+
+    def set_rpop(self, rpop, Xo0):
         self.rpop = rpop
+        self.Xo0 = Xo0
         self._Xpop()
 
         if not self.init:
-            self.set_f(self.Xy0, self.Xo0, self.Iint0, self.tauV0)
+            self.set_f()
 
     def _Xpop(self):
-        self.XpopOld__i = np.exp(-1. * self.r__i / self.rpop)
+        self.XpopOld__i = self.Xo0 * np.exp(-1. * self.r__i / self.rpop)
         self.XpopOld__il = (self.XpopOld__i * self.dim__li).T
-
-        self.XpopYoung__i = 1. - self.XpopOld__i
+        self.XpopYoung__i = (1. - self.XpopOld__i)
         self.XpopYoung__il = (self.XpopYoung__i * self.dim__li).T
 
     def set_rint(self, rint):
@@ -251,7 +257,7 @@ class galaxy:
         self._intens()
 
         if not self.init:
-            self.set_f(self.Xy0, self.Xo0, self.Iint0, self.tauV0)
+            self.set_f()
 
     def _intens(self):
         self.intensity__i = np.exp(-1. * self.r__i / self.rint)
@@ -268,7 +274,7 @@ class galaxy:
         self._tau()
 
         if not self.init:
-            self.set_f(self.Xy0, self.Xo0, self.Iint0, self.tauV0)
+            self.set_f()
 
     def readExtLaw(self, file):
         self.extLawFile = file
@@ -282,7 +288,7 @@ class galaxy:
         return t
 
     def _tau(self):
-        self.tauV__i = np.exp(-1. * self.r__i / self.rdust)
+        self.tauV__i = self.tauV0 * np.exp(-1. * self.r__i / self.rdust)
         self.tauV__il = (self.tauV__i * self.dim__li).T
 
     def _q(self):
@@ -293,8 +299,7 @@ class galaxy:
         else:
             self.q_CCM__l = np.ones(self.nl, dtype = np.float64)
 
-    def set_f(self, Xy0, Xo0, Iint0, tauV0):
-        self.Xy0, self.Xo0, self.Iint0, self.tauV0 = Xy0, Xo0, Iint0, tauV0
+    def set_f(self):
         self.fint__il, self.fobs__il = self._f()
 
     def get_coords(self, i):
@@ -312,15 +317,15 @@ class galaxy:
         self.set_rdust(0., 0.)
 
     def _f(self):
-        Xy = self.Xy0 * self.XpopYoung__il
-        fy = self.fyoung_norm__l
-        Xo = self.Xo0 * self.XpopOld__il
+        Xo = self.XpopOld__il
         fo = self.fold_norm__l
-        Iint = self.Iint0 * self.intensity__il
-        tauV = self.tauV0 * self.tauV__il
+        Xy = self.XpopYoung__il
+        fy = self.fyoung_norm__l
+        Iint = self.intensity__il
+        tauV = self.tauV__il
         q = self.q_CCM__l
 
-        fint = Iint * (Xo * fo) + (Xy * fy)
+        fint = Iint * ((Xo * fo) + (Xy * fy))
         fobs = fint * np.exp(-tauV * q)
 
         return fint, fobs
@@ -334,13 +339,12 @@ if __name__ == '__main__':
 
     gal = galaxy(base = PadovaSalp2000,
                  side = 51,
-                 rpop = 100.,
+                 rpop = 10000.,
                  rint = 5.,
-                 rdust = 100.,
-                 Xo0 = 1.,
-                 Xy0 = 1.,
-                 Iint0 = 1.,
-                 tauV0 = 1.,
+                 rdust = 1.,
+                 Xo0 = 0.5,
+                 tauV0 = 0.,
+                 extLawFile = '/home/lacerda/workspace/PCA/src/ExtLaws.out',
                  )
 
     ''' NOW Do what u want with GAL ;-) '''
@@ -372,6 +376,7 @@ if __name__ == '__main__':
     nRows = 5
     nCols = len(colArr) + 1
     f, axArr = plt.subplots(nRows, nCols)
+    f.set_size_inches(19.8, 10.8)
 
     for i in range(nRows):
         axArr[i, 0].set_ylabel('PC%d' % i)
@@ -390,7 +395,7 @@ if __name__ == '__main__':
     axArr[0, 0].set_title('XYoung')
     axArr[0, 1].set_title('XOld')
     axArr[0, 2].set_title('Intensity')
-    axArr[0, 2].set_title('tauV')
+    axArr[0, 3].set_title('tauV')
 
     plt.suptitle('Correlations PC0 ... PC4 - OBS NORM')
     f.savefig('GalPadSalp2000_corre_obs_norm_0-4.png')
