@@ -205,7 +205,7 @@ class PCAlifa:
         ldown = lc[s][0]
         lup = lc[s][1]
 
-        self.maskLambdaConstrains = (self.K.l_obs > ldown) & (self.K.l_obs < lup)
+        self.maskLambdaConstrains = (self.K.l_obs >= ldown) & (self.K.l_obs <= lup)
 
         self._setVars()
 
