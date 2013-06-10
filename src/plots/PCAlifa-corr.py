@@ -48,7 +48,7 @@ if __name__ == '__main__':
     P = PCA.PCAlifa(args.califaID, args.fitsDir, args.rFL, args.lc)
 
     if args.rSEL:
-        P.removeStarlightEmLines(args.rSEL)
+        P.setStarlightMaskFile(args.rSEL)
 
     P.PCA_obs_norm()
     P.tomograms_obs_norm()

@@ -106,7 +106,7 @@ if __name__ == '__main__':
     parseArrArgs(args, P.K.N_zone - 1)
 
     if args.rSEL:
-        P.removeStarlightEmLines(args.rSEL)
+        P.setStarlightMaskFile(args.rSEL)
 
     if (P.K.N_zone > args.zonesArr[-2]):
         for nZone in args.zonesArr:
