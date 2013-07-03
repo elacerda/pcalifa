@@ -319,7 +319,7 @@ class PCAlifa:
         ax1.set_title(r'tomogram %02i' % ti)
         im = ax1.imshow(tomogram, origin = 'lower', interpolation = 'nearest', aspect = 'auto')
         fig.colorbar(ax = ax1, mappable = im, use_gridspec = True)
-        ax2.set_title(r'eigval $%.4$' % eigval[ti])
+        ax2.set_title(r'eigval %.4e' % eigval[ti])
         ax2.plot(x, y)
         ax2.xaxis.set_major_locator(MaxNLocator(20))
         ax2.grid()
