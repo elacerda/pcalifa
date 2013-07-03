@@ -15,7 +15,7 @@ from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-fitsDirDefault = '/home/lacerda/CALIFA'
+fitsDirDefault = '/home/lacerda/CALIFA/gal_fits'
 quantilFlagDefault = 0.9
 fitsFilenameSuffix = '_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits'
 
@@ -275,7 +275,7 @@ class PCAlifa:
             adev = 100. * (1. / len(l)) * (np.abs(res) / O).sum()
             textStrAdev = 'adev =  %.4f %% - ' % adev
 
-        textStr = '%ssigmaReb = %.2e - sigmaNReb = %.2e - ratio = %.4f' % (textStrAdev, sigmaReb, sigmaNReb, sigmaRatio)
+        textStr = r'%s$\sigma_{reb} = %.2e$ - $\sigma_{Nreb} = %.2e$ - $ratio = %.4f$' % (textStrAdev, sigmaReb, sigmaNReb, sigmaRatio)
 
         ax.plot(l, O, label = 'Obs')
         ax.plot(l, R, label = 'Mod')
@@ -316,10 +316,10 @@ class PCAlifa:
         gs = gridspec.GridSpec(1, 2, width_ratios = [4, 7])
         ax1 = plt.subplot(gs[0])
         ax2 = plt.subplot(gs[1])
-        ax1.set_title('tomogram %02i' % ti)
+        ax1.set_title(r'tomogram %02i' % ti)
         im = ax1.imshow(tomogram, origin = 'lower', interpolation = 'nearest', aspect = 'auto')
         fig.colorbar(ax = ax1, mappable = im, use_gridspec = True)
-        ax2.set_title('eigval %.4e' % eigval[ti])
+        ax2.set_title(r'eigval $%.4$' % eigval[ti])
         ax2.plot(x, y)
         ax2.xaxis.set_major_locator(MaxNLocator(20))
         ax2.grid()
@@ -327,13 +327,13 @@ class PCAlifa:
         fig.savefig('%stomo_%02i.png' % (npref, ti))
         plt.close()
 
-    def screeTestPlot(self, eigval, maxInd, npref):
+    def screeTestPlot(self, eigval, maxInd, npref, title):
         fig = plt.figure(figsize = (8, 6))
         eigval_norm = eigval / eigval.sum()
         plt.plot(eigval_norm[:maxInd], linestyle = '-', marker = '*')
         plt.ylim([0, eigval_norm[1] * 1.1])
         plt.xticks(range(maxInd))
-        plt.title('%s scree test' % npref)
+        plt.title(r'%s Scree test' % title)
         plt.grid()
         fig.savefig('%sscree.png' % npref)
         plt.close()

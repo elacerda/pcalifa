@@ -14,6 +14,11 @@ from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 
+plt.rcParams.update({'font.family' : 'serif',
+                     'text.usetex' : True,
+                     'backend' : 'ps'
+                     })
+
 def parser_args():
     parser = ap.ArgumentParser(description = 'PCAlifa - correlations')
     parser.add_argument('--califaID', '-c',
@@ -126,12 +131,12 @@ if __name__ == '__main__':
 #########################################################################
 ############################## Tomograms ################################
 
-    P.screeTestPlot(P.eigVal_obs__k, args.tmax, npref_f_obs)
-    P.screeTestPlot(P.eigVal_obs_norm__k, args.tmax, npref_f_obs_norm)
-    P.screeTestPlot(P.eigVal_syn__k, args.tmax, npref_f_syn)
-    P.screeTestPlot(P.eigVal_syn_norm__k, args.tmax, npref_f_syn_norm)
-    P.screeTestPlot(P.eigVal_res__k, args.tmax, npref_f_res)
-    P.screeTestPlot(P.eigVal_res_norm__k, args.tmax, npref_r_res_norm)
+    P.screeTestPlot(P.eigVal_obs__k, args.tmax, npref_f_obs, '%s FOBS' % P.K.califaID)
+    P.screeTestPlot(P.eigVal_obs_norm__k, args.tmax, npref_f_obs_norm, '%s FOBS NORM' % P.K.califaID)
+    P.screeTestPlot(P.eigVal_syn__k, args.tmax, npref_f_syn, '%s FSYN' % P.K.califaID)
+    P.screeTestPlot(P.eigVal_syn_norm__k, args.tmax, npref_f_syn_norm, '%s FSYN NORM' % P.K.califaID)
+    P.screeTestPlot(P.eigVal_res__k, args.tmax, npref_f_res, '%s RES' % P.K.califaID)
+    P.screeTestPlot(P.eigVal_res_norm__k, args.tmax, npref_r_res_norm, '%s RES NORM' % P.K.califaID)
 
     for ti in range(args.tmax):
         P.tomoPlot(P.tomo_obs__kyx, P.l_obs, P.eigVec_obs__lk, P.eigVal_obs__k, ti, npref_f_obs)
@@ -174,6 +179,14 @@ if __name__ == '__main__':
             P.K.v_d
     ]
 
+    colNames = [
+        r'$\log t[yr]$',
+        r'$Z / Z_\odot$',
+        r'$A_V[mag]$',
+        r'$v_\star$',
+        r'$\sigma_\star$',
+        r'eigenvector',
+    ]
 ############################### OBS NORM ###############################     
 
     nRows = 10
@@ -195,14 +208,11 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title('at_flux')
-    axArr[0, 1].set_title('aZ_flux')
-    axArr[0, 2].set_title('A_V')
-    axArr[0, 3].set_title('v_0')
-    axArr[0, 4].set_title('v_d')
-    axArr[0, 5].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC9\ -\ OBS\ NORM')
     f.savefig('%s-corre_obs_norm_0-9.png' % P.K.califaID)
     plt.close()
 
@@ -224,14 +234,11 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title('at_flux')
-    axArr[0, 1].set_title('aZ_flux')
-    axArr[0, 2].set_title('A_V')
-    axArr[0, 3].set_title('v_0')
-    axArr[0, 4].set_title('v_d')
-    axArr[0, 5].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - SYN NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC9\ -\ SYN\ NORM')
     f.savefig('%s-corre_syn_norm_0-9.png' % P.K.califaID)
     plt.close()
 
@@ -249,18 +256,15 @@ if __name__ == '__main__':
         plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
     f.subplots_adjust(hspace = 0.0)
-    f.subplots_adjust(wspace = 0.1)
+    f.subplots_adjust(wspace = 0.05)
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title('at_flux')
-    axArr[0, 1].set_title('aZ_flux')
-    axArr[0, 2].set_title('A_V')
-    axArr[0, 3].set_title('v_0')
-    axArr[0, 4].set_title('v_d')
-    axArr[0, 5].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - SYN NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC9\ -\ RES\ NORM')
     f.savefig('%s-corre_res_norm_0-9.png' % P.K.califaID)
     plt.close()
 
@@ -293,6 +297,14 @@ if __name__ == '__main__':
     colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx3, :], logt[maskpopx3], (0, 0)) / popxtot)
     colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx4, :], logt[maskpopx4], (0, 0)) / popxtot)
 
+    colNames = [
+        r'$10^6$\ to\ $10^{7.5}yr$',
+        r'$10^{7.5}$\ to\ $10^{8.5}yr$',
+        r'$10^{8.5}$\ to\ $10^{9.5}yr$',
+        r'$10^{9.5}$\ to\ $10^{10.2}yr$',
+        r'eigenvector',
+    ]
+
     nRows = 10
     nCols = len(colArr) + 1
     f, axArr = plt.subplots(nRows, nCols)
@@ -312,13 +324,11 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title(r'$10^6 to 10^{7.5}yr$')
-    axArr[0, 1].set_title(r'$10^{7.5} to 10^{8.5}yr$')
-    axArr[0, 2].set_title(r'$10^{8.5} to 10^{9.5}yr$')
-    axArr[0, 3].set_title(r'$10^{9.5} to 10^{10.2}yr$')
-    axArr[0, 4].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC4\ -\ OBS\ NORM')
     f.savefig('%s-corre_obs_norm_popx_0-9.png' % P.K.califaID)
     plt.close()
 
@@ -340,13 +350,11 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title(r'$10^6 to 10^{7.5}yr$')
-    axArr[0, 1].set_title(r'$10^{7.5} to 10^{8.5}yr$')
-    axArr[0, 2].set_title(r'$10^{8.5} to 10^{9.5}yr$')
-    axArr[0, 3].set_title(r'$10^{9.5} to 10^{10.2}yr$')
-    axArr[0, 4].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC4\ -\ SYN\ NORM')
     f.savefig('%s-corre_syn_norm_popx_0-9.png' % P.K.califaID)
     plt.close()
 
@@ -368,13 +376,11 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title(r'$10^6 to 10^{7.5}yr$')
-    axArr[0, 1].set_title(r'$10^{7.5} to 10^{8.5}yr$')
-    axArr[0, 2].set_title(r'$10^{8.5} to 10^{9.5}yr$')
-    axArr[0, 3].set_title(r'$10^{9.5} to 10^{10.2}yr$')
-    axArr[0, 4].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC4\ -\ RES\ NORM')
     f.savefig('%s-corre_res_norm_popx_0-9.png' % P.K.califaID)
     plt.close()
 
@@ -399,10 +405,10 @@ if __name__ == '__main__':
     tomo_syn__zk, tomo_syn__kyx = P.tomogram(I_syn__zl, eigVec_syn__lk)
     tomo_syn_norm__zk, tomo_syn_norm__kyx = P.tomogram(I_syn_norm__zl, eigVec_syn_norm__lk)
 
-    P.screeTestPlot(eigVal_obs__k, args.tmax, npref_f_obs)
-    P.screeTestPlot(eigVal_obs_norm__k, args.tmax, npref_f_obs_norm)
-    P.screeTestPlot(eigVal_syn__k, args.tmax, npref_f_syn)
-    P.screeTestPlot(eigVal_syn_norm__k, args.tmax, npref_f_syn_norm)
+    P.screeTestPlot(eigVal_obs__k, args.tmax, npref_f_obs, '%s LOG FOBS' % P.K.califaID)
+    P.screeTestPlot(eigVal_obs_norm__k, args.tmax, npref_f_obs_norm, '%s LOG FOBS NORM' % P.K.califaID)
+    P.screeTestPlot(eigVal_syn__k, args.tmax, npref_f_syn, '%s LOG FSYN' % P.K.califaID)
+    P.screeTestPlot(eigVal_syn_norm__k, args.tmax, npref_f_syn_norm, '%s LOG FSYN NORM' % P.K.califaID)
 
     for ti in range(args.tmax):
         P.tomoPlot(tomo_obs__kyx, P.l_obs, eigVec_obs__lk, eigVal_obs__k, ti, npref_f_obs)
@@ -422,6 +428,14 @@ if __name__ == '__main__':
             P.K.v_d
     ]
 
+    colNames = [
+        r'$\log t[yr]$',
+        r'$Z / Z_\odot$',
+        r'$A_V[mag]$',
+        r'$v_\star$',
+        r'$\sigma_\star$',
+        r'eigenvector',
+    ]
 ############################### OBS NORM ###############################     
 
     nRows = 10
@@ -443,14 +457,11 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title('at_flux')
-    axArr[0, 1].set_title('aZ_flux')
-    axArr[0, 2].set_title('A_V')
-    axArr[0, 3].set_title('v_0')
-    axArr[0, 4].set_title('v_d')
-    axArr[0, 5].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC9\ -\ OBS\ NORM')
     f.savefig('%s-corre_logf_obs_norm_0-9.png' % P.K.califaID)
     plt.close()
 
@@ -472,14 +483,11 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title('at_flux')
-    axArr[0, 1].set_title('aZ_flux')
-    axArr[0, 2].set_title('A_V')
-    axArr[0, 3].set_title('v_0')
-    axArr[0, 4].set_title('v_d')
-    axArr[0, 5].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - SYN NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC9\ -\ SYN\ NORM')
     f.savefig('%s-corre_logf_syn_norm_0-9.png' % P.K.califaID)
     plt.close()
 
@@ -512,6 +520,14 @@ if __name__ == '__main__':
     colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx3, :], logt[maskpopx3], (0, 0)) / popxtot)
     colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx4, :], logt[maskpopx4], (0, 0)) / popxtot)
 
+    colNames = [
+        r'$10^6$\ to\ $10^{7.5}yr$',
+        r'$10^{7.5}$\ to\ $10^{8.5}yr$',
+        r'$10^{8.5}$\ to\ $10^{9.5}yr$',
+        r'$10^{9.5}$\ to\ $10^{10.2}yr$',
+        r'eigenvector',
+    ]
+
     nRows = 10
     nCols = len(colArr) + 1
     f, axArr = plt.subplots(nRows, nCols)
@@ -531,13 +547,11 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title(r'$10^6 to 10^{7.5}yr$')
-    axArr[0, 1].set_title(r'$10^{7.5} to 10^{8.5}yr$')
-    axArr[0, 2].set_title(r'$10^{8.5} to 10^{9.5}yr$')
-    axArr[0, 3].set_title(r'$10^{9.5} to 10^{10.2}yr$')
-    axArr[0, 4].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC4\ -\ OBS\ NORM')
     f.savefig('%s-corre_logf_obs_norm_popx_0-9.png' % P.K.califaID)
     plt.close()
 
@@ -559,12 +573,10 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title(r'$10^6 to 10^{7.5}yr$')
-    axArr[0, 1].set_title(r'$10^{7.5} to 10^{8.5}yr$')
-    axArr[0, 2].set_title(r'$10^{8.5} to 10^{9.5}yr$')
-    axArr[0, 3].set_title(r'$10^{9.5} to 10^{10.2}yr$')
-    axArr[0, 4].set_title('eigenvector')
 
-    plt.suptitle('Correlations PC0 ... PC9 - OBS NORM')
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
+
+    plt.suptitle(r'Correlations\ PC0\ ...\ PC4\ -\ SYN\ NORM')
     f.savefig('%s-corre_logf_syn_norm_popx_0-9.png' % P.K.califaID)
     plt.close()

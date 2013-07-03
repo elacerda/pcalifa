@@ -15,8 +15,6 @@ from scipy import linalg
 from matplotlib import pyplot as plt
 from astropy.io import ascii
 
-
-
 def plotRebuildSpec(l, O, R, eVal, eVec, eVecUsed, npref):
     ''' criando uma string com os eigenvectors usados para reconstruir o cubo '''
     eVecUsedStr = ''
