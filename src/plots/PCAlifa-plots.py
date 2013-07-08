@@ -72,6 +72,10 @@ def parser_args():
                         help = 'Plots correlations.',
                         action = 'store_true',
                         default = False)
+    parser.add_argument('--numcorrepc',
+                        help = 'Number os PCs to plot correlations.',
+                        type = int,
+                        default = 5)
 
     return parser.parse_args()
 
@@ -195,7 +199,9 @@ if __name__ == '__main__':
                 P.K.aZ_flux__z / 0.019,
                 P.K.A_V,
                 P.K.v_0,
-                P.K.v_d
+                P.K.v_d,
+                P.K.Mcor__z,
+                np.log10(P.K.Mcor__z),
         ]
 
         colNames = [
@@ -204,11 +210,13 @@ if __name__ == '__main__':
             r'$A_V[mag]$',
             r'$v_\star$',
             r'$\sigma_\star$',
+            r'$M_\odot / pc^2$',
+            r'$\log\ M\ [M_\odot / pc^2]$',
             r'eigenvector',
         ]
     ############################### OBS NORM ###############################     
 
-        nRows = 10
+        nRows = args.numcorrepc
         nCols = len(colArr) + 1
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
@@ -231,8 +239,8 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - OBS NORM')
-        f.savefig('%s-corre_obs_norm_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - OBS NORM')
+        f.savefig('%s-corre_obs_norm.png' % P.K.califaID)
         plt.close()
 
     ############################### SYN NORM ###############################     
@@ -257,8 +265,8 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - SYN NORM')
-        f.savefig('%s-corre_syn_norm_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - SYN NORM')
+        f.savefig('%s-corre_syn_norm.png' % P.K.califaID)
         plt.close()
 
     ############################### RES NORM ###############################     
@@ -283,8 +291,8 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - RES NORM')
-        f.savefig('%s-corre_res_norm_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - RES NORM')
+        f.savefig('%s-corre_res_norm.png' % P.K.califaID)
         plt.close()
 
     #########################################################################
@@ -324,7 +332,7 @@ if __name__ == '__main__':
             r'eigenvector',
         ]
 
-        nRows = 10
+        nRows = args.numcorrepc
         nCols = len(colArr) + 1
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
@@ -347,8 +355,8 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - OBS NORM')
-        f.savefig('%s-corre_obs_norm_popx_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - OBS NORM')
+        f.savefig('%s-corre_obs_norm_popx.png' % P.K.califaID)
         plt.close()
 
     ############################### SYN NORM ###############################
@@ -373,8 +381,8 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - SYN NORM')
-        f.savefig('%s-corre_syn_norm_popx_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - SYN NORM')
+        f.savefig('%s-corre_syn_norm_popx.png' % P.K.califaID)
         plt.close()
 
     ############################### RES NORM ###############################
@@ -399,8 +407,8 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - RES NORM')
-        f.savefig('%s-corre_res_norm_popx_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - RES NORM')
+        f.savefig('%s-corre_res_norm_popx.png' % P.K.califaID)
         plt.close()
 
 #########################################################################
@@ -446,7 +454,9 @@ if __name__ == '__main__':
                 P.K.aZ_flux__z / 0.019,
                 P.K.A_V,
                 P.K.v_0,
-                P.K.v_d
+                P.K.v_d,
+                P.K.Mcor__z,
+                np.log10(P.K.Mcor__z),
         ]
 
         colNames = [
@@ -455,6 +465,8 @@ if __name__ == '__main__':
             r'$A_V[mag]$',
             r'$v_\star$',
             r'$\sigma_\star$',
+            r'$M_\odot / pc^2$',
+            r'$\log\ M\ [M_\odot / pc^2]$',
             r'eigenvector',
         ]
     ############################### OBS NORM ###############################     
@@ -482,8 +494,8 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - OBS NORM')
-        f.savefig('%s-corre_logf_obs_norm_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - OBS NORM')
+        f.savefig('%s-corre_logf_obs_norm.png' % P.K.califaID)
         plt.close()
 
     ############################### SYN NORM ###############################     
@@ -508,8 +520,8 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - SYN NORM')
-        f.savefig('%s-corre_logf_syn_norm_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - SYN NORM')
+        f.savefig('%s-corre_logf_syn_norm.png' % P.K.califaID)
         plt.close()
 
     #########################################################################
@@ -572,8 +584,8 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - OBS NORM')
-        f.savefig('%s-corre_logf_obs_norm_popx_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - OBS NORM')
+        f.savefig('%s-corre_logf_obs_norm_popx.png' % P.K.califaID)
         plt.close()
 
     ############################### SYN NORM ###############################
@@ -598,6 +610,6 @@ if __name__ == '__main__':
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations PC0 ... PC9 - SYN NORM')
-        f.savefig('%s-corre_logf_syn_norm_popx_0-9.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - SYN NORM')
+        f.savefig('%s-corre_logf_syn_norm_popx.png' % P.K.califaID)
         plt.close()
