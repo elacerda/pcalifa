@@ -15,6 +15,11 @@ from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
+plt.rcParams.update({'font.family' : 'Times New Roman',
+                     'text.usetex' : False,
+                     'backend' : 'ps'
+                     })
+
 fitsDirDefault = '/home/lacerda/CALIFA/gal_fits'
 quantilFlagDefault = 0.9
 fitsFilenameSuffix = '_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits'
@@ -251,11 +256,8 @@ class PCAlifa:
 
         return I_rec, f_rec
 
-    def zoneRebuildSpecAxisPlot(self, ax, l, O, R, eVal, eVec, eVMask, npref, fontsize = 7, resid = False):
-        ''' criando uma string com os eigenvectors usados para reconstruir o cubo'''
+    def zoneRebuildSpecAxisPlot(self, ax, l, O, R, eVal, eVec, eVMask, npref, fontsize, resid):
         res = O - R
-        adev = 100. * (1. / len(l)) * (np.abs(res) / O).sum()
-
         sigmaNReb = 0.
         sigmaReb = np.sqrt(eVal[eVMask].sum())
 
@@ -267,21 +269,29 @@ class PCAlifa:
         sigmaRatio = sigmaNReb / sigmaReb
 
         textStrAdev = ''
+        res_plot = res
+        res_label = 'res'
 
         if resid:
             ax.set_ylim([1.1 * O.min(), 1.1 * O.max()])
         else:
+            res_plot = 5. * res
+            res_label = r'$5\ \times$ res'
             ax.set_ylim([-0.5 * O.mean(), 1.5 * O.mean()])
             adev = 100. * (1. / len(l)) * (np.abs(res) / O).sum()
-            textStrAdev = 'adev =  %.4f %% - ' % adev
+            textStrAdev = 'adev\ =\ %.4f\ \%%' % adev
 
-        textStr = r'%s$\sigma_{reb} = %.2e$ - $\sigma_{Nreb} = %.2e$ - $ratio = %.4f$' % (textStrAdev, sigmaReb, sigmaNReb, sigmaRatio)
+        textStr = r'$%s \ \ \sigma_{reb}\ =\ %s\ \ \sigma_{Nreb}\ =\ %s\ \ ratio\ =\ %.2f$' % (textStrAdev, self.nToStrSciNot(sigmaReb), self.nToStrSciNot(sigmaNReb), sigmaRatio)
 
         ax.plot(l, O, label = 'Obs')
         ax.plot(l, R, label = 'Mod')
-        ax.plot(l, res, label = 'res')
-        ax.text(0.01, 0.92, textStr, fontsize = fontsize + 3, transform = ax.transAxes,
-                horizontalalignment = 'left', verticalalignment = 'center', multialignment = 'left')
+        ax.plot(l, res_plot, label = res_label)
+
+        ax.text(0.05, 0.92, textStr,
+                fontsize = fontsize + 1, transform = ax.transAxes,
+                horizontalalignment = 'left',
+                verticalalignment = 'center',
+                multialignment = 'left')
         ax.legend(prop = {'size' : fontsize})
         ax.grid()
 
@@ -316,10 +326,10 @@ class PCAlifa:
         gs = gridspec.GridSpec(1, 2, width_ratios = [4, 7])
         ax1 = plt.subplot(gs[0])
         ax2 = plt.subplot(gs[1])
-        ax1.set_title(r'tomogram %02i' % ti)
+        ax1.set_title(r'tomogram $%02i$' % ti)
         im = ax1.imshow(tomogram, origin = 'lower', interpolation = 'nearest', aspect = 'auto')
         fig.colorbar(ax = ax1, mappable = im, use_gridspec = True)
-        ax2.set_title(r'eigval %.4e' % eigval[ti])
+        ax2.set_title(r'eigval $%.4e$' % eigval[ti])
         ax2.plot(x, y)
         ax2.xaxis.set_major_locator(MaxNLocator(20))
         ax2.grid()
@@ -337,4 +347,15 @@ class PCAlifa:
         plt.grid()
         fig.savefig('%sscree.png' % npref)
         plt.close()
+
+    def nToStrSciNot(self, n):
+        e = np.floor(np.log10(np.abs(n)))
+        m = n / 10.**(e)
+
+        if np.int(e) == 0:
+            nStr = r'%.2f' % n
+        else:
+            nStr = r'%.2f \times 10^{%d}' % (m, e)
+
+        return nStr
 
