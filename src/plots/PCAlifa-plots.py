@@ -210,8 +210,8 @@ if __name__ == '__main__':
             r'$A_V\ [mag]$',
             r'$v_\star\ [km/s]$',
             r'$\sigma_\star\ [km/s]$',
-            r'$M [M_\odot]$',
-            r'$\log\ M\ [M_\odot]$',
+            r'$\mathcal{M}\ [M_\odot]$',
+            r'$\log\ \mathcal{M}\ [M_\odot]$',
             r'eigenvector',
         ]
     ############################### OBS NORM ###############################     
@@ -465,8 +465,8 @@ if __name__ == '__main__':
             r'$A_V\ [mag]$',
             r'$v_\star\ [km/s]$',
             r'$\sigma_\star\ [km/s]$',
-            r'$M_\odot$',
-            r'$\log\ M\ [M_\odot]$',
+            r'$\mathcal{M}\ [M_\odot]$',
+            r'$\log\ \mathcal{M}\ [M_\odot]$',
             r'eigenvector',
         ]
     ############################### OBS NORM ###############################     
