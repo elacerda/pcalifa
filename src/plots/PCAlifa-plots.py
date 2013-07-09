@@ -207,11 +207,11 @@ if __name__ == '__main__':
         colNames = [
             r'$\log t[yr]$',
             r'$Z / Z_\odot$',
-            r'$A_V[mag]$',
-            r'$v_\star$',
-            r'$\sigma_\star$',
-            r'$M_\odot / pc^2$',
-            r'$\log\ M\ [M_\odot / pc^2]$',
+            r'$A_V\ [mag]$',
+            r'$v_\star\ [km/s]$',
+            r'$\sigma_\star\ [km/s]$',
+            r'$M [M_\odot]$',
+            r'$\log\ M\ [M_\odot]$',
             r'eigenvector',
         ]
     ############################### OBS NORM ###############################     
@@ -462,16 +462,16 @@ if __name__ == '__main__':
         colNames = [
             r'$\log t[yr]$',
             r'$Z / Z_\odot$',
-            r'$A_V[mag]$',
-            r'$v_\star$',
-            r'$\sigma_\star$',
-            r'$M_\odot / pc^2$',
-            r'$\log\ M\ [M_\odot / pc^2]$',
+            r'$A_V\ [mag]$',
+            r'$v_\star\ [km/s]$',
+            r'$\sigma_\star\ [km/s]$',
+            r'$M_\odot$',
+            r'$\log\ M\ [M_\odot]$',
             r'eigenvector',
         ]
     ############################### OBS NORM ###############################     
 
-        nRows = 10
+        nRows = args.numcorrepc
         nCols = len(colArr) + 1
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
@@ -554,14 +554,14 @@ if __name__ == '__main__':
         colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx4, :], logt[maskpopx4], (0, 0)) / popxtot)
 
         colNames = [
-            r'$10^6$\ to\ $10^{7.5}yr$',
-            r'$10^{7.5}$\ to\ $10^{8.5}yr$',
-            r'$10^{8.5}$\ to\ $10^{9.5}yr$',
-            r'$10^{9.5}$\ to\ $10^{10.2}yr$',
+            r'$10^6\ to\ 10^{7.5}yr$',
+            r'$10^{7.5}\ to\ 10^{8.5}yr$',
+            r'$10^{8.5}\ to\ 10^{9.5}yr$',
+            r'$10^{9.5}\ to\ 10^{10.2}yr$',
             r'eigenvector',
         ]
 
-        nRows = 10
+        nRows = args.numcorrepc
         nCols = len(colArr) + 1
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
