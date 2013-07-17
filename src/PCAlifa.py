@@ -131,11 +131,14 @@ class PCAlifa:
 
     def _setVars(self):
         mask = self.maskEmLines & self.maskLambdaConstrains & self.maskQFlag
+        synMask = self.maskLambdaConstrains & self.maskQFlag
+
         self.l_obs = self.K.l_obs[mask]
+        self.l_syn = self.K.l_obs[synMask]
         self.f_obs__zl = self.K.f_obs[mask].transpose()
         self.f_obs_norm__zl = (self.K.f_obs[mask] / self.K.fobs_norm).transpose()
-        self.f_syn__zl = self.K.f_syn[mask].transpose()
-        self.f_syn_norm__zl = (self.K.f_syn[mask] / self.K.fobs_norm).transpose()
+        self.f_syn__zl = self.K.f_syn[synMask].transpose()
+        self.f_syn_norm__zl = (self.K.f_syn[synMask] / self.K.fobs_norm).transpose()
         self.f_res__zl = (self.K.f_obs[mask] - self.K.f_syn[mask]).transpose()
         self.f_res_norm__zl = ((self.K.f_obs[mask] - self.K.f_syn[mask]) / self.K.fobs_norm).transpose()
 
@@ -260,11 +263,13 @@ class PCAlifa:
         res = O - R
         sigmaNReb = 0.
         sigmaReb = np.sqrt(eVal[eVMask].sum())
+        varReb = eVal[eVMask].sum() / eVal.sum()
 
         eVMask_not_used = np.asarray([not x for x in eVMask])
 
         if eVMask_not_used.any():
             sigmaNReb = np.sqrt(eVal[eVMask_not_used].sum())
+            varNReb = eVal[eVMask_not_used].sum() / eVal.sum()
 
         sigmaRatio = sigmaNReb / sigmaReb
 
@@ -329,7 +334,8 @@ class PCAlifa:
         ax1.set_title(r'tomogram $%02i$' % ti)
         im = ax1.imshow(tomogram, origin = 'lower', interpolation = 'nearest', aspect = 'auto')
         fig.colorbar(ax = ax1, mappable = im, use_gridspec = True)
-        ax2.set_title(r'Eigenvalue $%s$' % self.nToStrSciNot(eigval[ti]))
+        eigval_norm = 100. * eigval[ti] / eigval.sum()
+        ax2.set_title(r'Eigenvalue $%s$ ($%.2f\ \%%$)' % (self.nToStrSciNot(eigval[ti]), eigval_norm))
         ax2.plot(x, y)
         ax2.xaxis.set_major_locator(MaxNLocator(20))
         ax2.set_ylabel(r'$PC %02i$' % ti)
@@ -340,7 +346,7 @@ class PCAlifa:
 
     def screeTestPlot(self, eigval, maxInd, npref, title):
         fig = plt.figure(figsize = (8, 6))
-        eigval_norm = eigval / eigval.sum()
+        eigval_norm = 100. * eigval / eigval.sum()
         plt.plot(eigval_norm[:maxInd], linestyle = '-', marker = '*')
         plt.ylim([0, eigval_norm[1] * 1.1])
         plt.xticks(range(maxInd))

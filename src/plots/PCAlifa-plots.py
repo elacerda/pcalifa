@@ -73,7 +73,7 @@ def parser_args():
                         action = 'store_true',
                         default = False)
     parser.add_argument('--numcorrepc',
-                        help = 'Number os PCs to plot correlations.',
+                        help = 'Number of PCs to plot correlations.',
                         type = int,
                         default = 5)
 
@@ -159,8 +159,8 @@ if __name__ == '__main__':
         for ti in range(args.tmax):
             P.tomoPlot(P.tomo_obs__kyx, P.l_obs, P.eigVec_obs__lk, P.eigVal_obs__k, ti, npref_f_obs)
             P.tomoPlot(P.tomo_obs_norm__kyx, P.l_obs, P.eigVec_obs_norm__lk, P.eigVal_obs_norm__k, ti, npref_f_obs_norm)
-            P.tomoPlot(P.tomo_syn__kyx, P.l_obs, P.eigVec_syn__lk, P.eigVal_syn__k, ti, npref_f_syn)
-            P.tomoPlot(P.tomo_syn_norm__kyx, P.l_obs, P.eigVec_syn_norm__lk, P.eigVal_syn_norm__k, ti, npref_f_syn_norm)
+            P.tomoPlot(P.tomo_syn__kyx, P.l_syn, P.eigVec_syn__lk, P.eigVal_syn__k, ti, npref_f_syn)
+            P.tomoPlot(P.tomo_syn_norm__kyx, P.l_syn, P.eigVec_syn_norm__lk, P.eigVal_syn_norm__k, ti, npref_f_syn_norm)
             P.tomoPlot(P.tomo_res__kyx, P.l_obs, P.eigVec_res__lk, P.eigVal_res__k, ti, npref_f_res)
             P.tomoPlot(P.tomo_res_norm__kyx, P.l_obs, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, ti, npref_r_res_norm)
 
@@ -177,9 +177,9 @@ if __name__ == '__main__':
                                 P.f_obs__zl, P.tomo_obs__zk, P.eigVec_obs__lk, P.eigVal_obs__k, P.ms_obs__l, npref_f_obs, False)
                 zoneRebuildSpec(nZone, args.eigvArr, P.l_obs,
                                 P.f_obs_norm__zl, P.tomo_obs_norm__zk, P.eigVec_obs_norm__lk, P.eigVal_obs_norm__k, P.ms_obs_norm__l, npref_f_obs_norm, False)
-                zoneRebuildSpec(nZone, args.eigvArr, P.l_obs,
+                zoneRebuildSpec(nZone, args.eigvArr, P.l_syn,
                                 P.f_syn__zl, P.tomo_syn__zk, P.eigVec_syn__lk, P.eigVal_syn__k, P.ms_syn__l, npref_f_syn, False)
-                zoneRebuildSpec(nZone, args.eigvArr, P.l_obs,
+                zoneRebuildSpec(nZone, args.eigvArr, P.l_syn,
                                 P.f_syn_norm__zl, P.tomo_syn_norm__zk, P.eigVec_syn_norm__lk, P.eigVal_syn_norm__k, P.ms_syn_norm__l, npref_f_syn_norm, False)
                 zoneRebuildSpec(nZone, args.eigvArr, P.l_obs,
                                 P.f_res__zl, P.tomo_res__zk, P.eigVec_res__lk, P.eigVal_res__k, P.ms_res__l, npref_f_res, True)
@@ -196,22 +196,18 @@ if __name__ == '__main__':
     if args.correlat:
         colArr = [
                 P.K.at_flux__z,
-                P.K.aZ_flux__z / 0.019,
+                np.log10(P.K.aZ_flux__z / 0.019),
                 P.K.A_V,
                 P.K.v_0,
                 P.K.v_d,
-                P.K.Mcor__z,
-                np.log10(P.K.Mcor__z),
         ]
 
         colNames = [
-            r'$\log t[yr]$',
-            r'$Z / Z_\odot$',
+            r'$\log\ t\ [yr]$',
+            r'$\log\ Z\ [Z_\odot]$',
             r'$A_V\ [mag]$',
             r'$v_\star\ [km/s]$',
             r'$\sigma_\star\ [km/s]$',
-            r'$M\ [M_\odot]$',
-            r'$\log\ M [M_\odot]$',
             r'eigenvector',
         ]
     ############################### OBS NORM ###############################     
@@ -253,7 +249,7 @@ if __name__ == '__main__':
             for j in range(nCols)[:-1]:
                 P.correlationAxisPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
 
-            axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_syn_norm__lk[:, i])
+            axArr[i, nCols - 1].plot(P.l_syn, P.eigVec_syn_norm__lk[:, i])
             plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
         f.subplots_adjust(hspace = 0.0)
@@ -369,7 +365,7 @@ if __name__ == '__main__':
             for j in range(nCols)[:-1]:
                 P.correlationAxisPlot(colArr[j], P.tomo_syn_norm__zk[:, i], axArr[i, j])
 
-            axArr[i, nCols - 1].plot(P.l_obs, P.eigVec_syn_norm__lk[:, i])
+            axArr[i, nCols - 1].plot(P.l_syn, P.eigVec_syn_norm__lk[:, i])
             plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
         f.subplots_adjust(hspace = 0.0)
@@ -441,8 +437,8 @@ if __name__ == '__main__':
         for ti in range(args.tmax):
             P.tomoPlot(tomo_obs__kyx, P.l_obs, eigVec_obs__lk, eigVal_obs__k, ti, npref_f_obs)
             P.tomoPlot(tomo_obs_norm__kyx, P.l_obs, eigVec_obs_norm__lk, eigVal_obs_norm__k, ti, npref_f_obs_norm)
-            P.tomoPlot(tomo_syn__kyx, P.l_obs, eigVec_syn__lk, eigVal_syn__k, ti, npref_f_syn)
-            P.tomoPlot(tomo_syn_norm__kyx, P.l_obs, eigVec_syn_norm__lk, eigVal_syn_norm__k, ti, npref_f_syn_norm)
+            P.tomoPlot(tomo_syn__kyx, P.l_syn, eigVec_syn__lk, eigVal_syn__k, ti, npref_f_syn)
+            P.tomoPlot(tomo_syn_norm__kyx, P.l_syn, eigVec_syn_norm__lk, eigVal_syn_norm__k, ti, npref_f_syn_norm)
 
 
 #########################################################################
@@ -451,22 +447,18 @@ if __name__ == '__main__':
     if args.correlat:
         colArr = [
                 P.K.at_flux__z,
-                P.K.aZ_flux__z / 0.019,
+                np.log10(P.K.aZ_flux__z / 0.019),
                 P.K.A_V,
                 P.K.v_0,
                 P.K.v_d,
-                P.K.Mcor__z,
-                np.log10(P.K.Mcor__z),
         ]
 
         colNames = [
-            r'$\log t[yr]$',
-            r'$Z / Z_\odot$',
+            r'$\log\ t[yr]$',
+            r'$\log\ Z\ [Z_\odot]$',
             r'$A_V\ [mag]$',
             r'$v_\star\ [km/s]$',
             r'$\sigma_\star\ [km/s]$',
-            r'$M \ [M_\odot]$',
-            r'$\log\ M\ [M_\odot]$',
             r'eigenvector',
         ]
     ############################### OBS NORM ###############################     
@@ -508,11 +500,11 @@ if __name__ == '__main__':
             for j in range(nCols)[:-1]:
                 P.correlationAxisPlot(colArr[j], tomo_syn_norm__zk[:, i], axArr[i, j])
 
-            axArr[i, nCols - 1].plot(P.l_obs, eigVec_syn_norm__lk[:, i])
+            axArr[i, nCols - 1].plot(P.l_syn, eigVec_syn_norm__lk[:, i])
             plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
         f.subplots_adjust(hspace = 0.0)
-        f.subplots_adjust(wspace = 0.15)
+        f.subplots_adjust(wspace = 0.05)
 
         plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
         plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
@@ -598,7 +590,7 @@ if __name__ == '__main__':
             for j in range(nCols)[:-1]:
                 P.correlationAxisPlot(colArr[j], tomo_syn_norm__zk[:, i], axArr[i, j])
 
-            axArr[i, nCols - 1].plot(P.l_obs, eigVec_syn_norm__lk[:, i])
+            axArr[i, nCols - 1].plot(P.l_syn, eigVec_syn_norm__lk[:, i])
             plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
         f.subplots_adjust(hspace = 0.0)
