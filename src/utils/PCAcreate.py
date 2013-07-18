@@ -372,13 +372,10 @@ if __name__ == '__main__':
     ]
 
     colNames = [
-            r'$\log t[yr]$',
-            r'$Z / Z_\odot$',
-            r'$A_V\ [mag]$',
-            r'$v_\star\ [km/s]$',
-            r'$\sigma_\star\ [km/s]$',
-            r'$M\ [M_\odot]$',
-            r'$\log\ M [M_\odot]$',
+            r'$10^6\ to\ 10^{7.5}yr$',
+            r'$10^{7.5}\ to\ 10^{8.5}yr$',
+            r'$10^{8.5}\ to\ 10^{9.5}yr$',
+            r'$10^{9.5}\ to\ 10^{10.2}yr$',
             r'eigenvector',
     ]
 
@@ -401,10 +398,9 @@ if __name__ == '__main__':
 
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-    axArr[0, 0].set_title('XYoung')
-    axArr[0, 1].set_title('XOld')
-    axArr[0, 2].set_title('Intensity')
-    axArr[0, 3].set_title('tauV')
+
+    for i in range(nCols):
+        axArr[0, i].set_title(colNames[i])
 
     plt.suptitle('Correlations PC0 ... PC4 - OBS NORM')
     f.savefig('GalPadSalp2000_corre_obs_norm_0-4.png')
