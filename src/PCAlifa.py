@@ -236,7 +236,7 @@ class PCAlifa:
     def setStarlightMaskFile(self, maskFile):
         self.starlightMaskFile = maskFile
         t = atpy.Table(maskfile = maskFile, type = 'starlight_mask')
-        mask = (self.K.l_obs > t[0]['l_up'])
+        mask = (self.K.l_obs >= t[0]['l_up'])
 
         for i in range(1, len(t)):
             if (t[i]['weight'] == 0.0):
@@ -367,4 +367,16 @@ class PCAlifa:
             nStr = r'%.2f \times 10^{%d}' % (m, e)
 
         return nStr
+
+    def sanityCheck(self, l, f, npref):
+        f = plt.figure()
+        f.set_size_inches(19.2, 10.8)
+        plt.plot(l, f)
+        plt.plot(l, f, 'r.')
+        plt.ylabel(r'Obs. flux $[erg/s/cm^2/\AA]$')
+        plt.xlabel(r'Wavelength $[\AA]$')
+        plt.title(r'Mask check (zone 0)')
+        plt.grid()
+        f.savefig('%ssanity_check.png' % npref)
+
 

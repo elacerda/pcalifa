@@ -76,6 +76,11 @@ def parser_args():
                         help = 'Number of PCs to plot correlations.',
                         type = int,
                         default = 5)
+    parser.add_argument('--outputfname',
+                        help = 'If provided, this adds OUTPUTFNAME to filenames.',
+                        type = str,
+                        default = False)
+
 
     return parser.parse_args()
 
@@ -143,7 +148,20 @@ if __name__ == '__main__':
     npref_f_syn = '%s-f_syn_' % P.K.califaID
     npref_f_syn_norm = '%s-f_syn_norm_' % P.K.califaID
     npref_f_res = '%s-f_res_' % P.K.califaID
-    npref_r_res_norm = '%s-f_res_norm_' % P.K.califaID
+    npref_f_res_norm = '%s-f_res_norm_' % P.K.califaID
+
+    if args.outputfname:
+        npref_f_obs = '%s%s_' % (npref_f_obs, args.outputfname)
+        npref_f_obs_norm = '%s%s_' % (npref_f_obs_norm, args.outputfname)
+        npref_f_syn = '%s%s_' % (npref_f_syn, args.outputfname)
+        npref_f_syn_norm = '%s%s_' % (npref_f_syn_norm, args.outputfname)
+        npref_f_res = '%s%s_' % (npref_f_res, args.outputfname)
+        npref_f_res_norm = '%s%s_' % (npref_f_res_norm, args.outputfname)
+
+    #### SANITY CHECK ####
+    P.sanityCheck(P.l_obs, P.f_obs__zl[0, :], npref_f_obs)
+    ######################
+
 
 #########################################################################
 ############################## Tomograms ################################
@@ -154,7 +172,7 @@ if __name__ == '__main__':
         P.screeTestPlot(P.eigVal_syn__k, args.tmax, npref_f_syn, '%s FSYN' % P.K.califaID)
         P.screeTestPlot(P.eigVal_syn_norm__k, args.tmax, npref_f_syn_norm, '%s FSYN NORM' % P.K.califaID)
         P.screeTestPlot(P.eigVal_res__k, args.tmax, npref_f_res, '%s RES' % P.K.califaID)
-        P.screeTestPlot(P.eigVal_res_norm__k, args.tmax, npref_r_res_norm, '%s RES NORM' % P.K.califaID)
+        P.screeTestPlot(P.eigVal_res_norm__k, args.tmax, npref_f_res_norm, '%s RES NORM' % P.K.califaID)
 
         for ti in range(args.tmax):
             P.tomoPlot(P.tomo_obs__kyx, P.l_obs, P.eigVec_obs__lk, P.eigVal_obs__k, ti, npref_f_obs)
@@ -162,7 +180,7 @@ if __name__ == '__main__':
             P.tomoPlot(P.tomo_syn__kyx, P.l_syn, P.eigVec_syn__lk, P.eigVal_syn__k, ti, npref_f_syn)
             P.tomoPlot(P.tomo_syn_norm__kyx, P.l_syn, P.eigVec_syn_norm__lk, P.eigVal_syn_norm__k, ti, npref_f_syn_norm)
             P.tomoPlot(P.tomo_res__kyx, P.l_obs, P.eigVec_res__lk, P.eigVal_res__k, ti, npref_f_res)
-            P.tomoPlot(P.tomo_res_norm__kyx, P.l_obs, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, ti, npref_r_res_norm)
+            P.tomoPlot(P.tomo_res_norm__kyx, P.l_obs, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, ti, npref_f_res_norm)
 
 #########################################################################
 #########################################################################
@@ -184,7 +202,7 @@ if __name__ == '__main__':
                 zoneRebuildSpec(nZone, args.eigvArr, P.l_obs,
                                 P.f_res__zl, P.tomo_res__zk, P.eigVec_res__lk, P.eigVal_res__k, P.ms_res__l, npref_f_res, True)
                 zoneRebuildSpec(nZone, args.eigvArr, P.l_obs,
-                                P.f_res_norm__zl, P.tomo_res_norm__zk, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, P.ms_res_norm__l, npref_r_res_norm, True)
+                                P.f_res_norm__zl, P.tomo_res_norm__zk, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, P.ms_res_norm__l, npref_f_res_norm, True)
         else:
             print "%s N_Zone < %d" % (P.K.califaID, args.zonesArr[-2])
 #########################################################################
@@ -210,10 +228,12 @@ if __name__ == '__main__':
             r'$\sigma_\star\ [km/s]$',
             r'eigenvector',
         ]
-    ############################### OBS NORM ###############################     
 
         nRows = args.numcorrepc
         nCols = len(colArr) + 1
+
+    ############################### OBS NORM ###############################     
+
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
 
@@ -417,6 +437,12 @@ if __name__ == '__main__':
     npref_f_obs_norm = '%s-logf_obs_norm_' % P.K.califaID
     npref_f_syn = '%s-logf_syn_' % P.K.califaID
     npref_f_syn_norm = '%s-logf_syn_norm_' % P.K.califaID
+
+    if args.outputfname:
+        npref_f_obs = '%s%s_' % (npref_f_obs, args.outputfname)
+        npref_f_obs_norm = '%s%s_' % (npref_f_obs_norm, args.outputfname)
+        npref_f_syn = '%s%s_' % (npref_f_syn, args.outputfname)
+        npref_f_syn_norm = '%s%s_' % (npref_f_syn_norm, args.outputfname)
 
     I_obs__zl, ms_obs__l, covMat_obs__ll, eigVal_obs__k, eigVec_obs__lk = P.PCA(np.log10(np.abs(P.f_obs__zl)), P.K.N_zone, 0)
     I_obs_norm__zl, ms_obs_norm__l, covMat_obs_norm__ll, eigVal_obs_norm__k, eigVec_obs_norm__lk = P.PCA(np.log10(np.abs(P.f_obs_norm__zl)), P.K.N_zone, 0)

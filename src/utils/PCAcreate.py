@@ -371,6 +371,17 @@ if __name__ == '__main__':
             gal.tauV__i[by_radius]
     ]
 
+    colNames = [
+            r'$\log t[yr]$',
+            r'$Z / Z_\odot$',
+            r'$A_V\ [mag]$',
+            r'$v_\star\ [km/s]$',
+            r'$\sigma_\star\ [km/s]$',
+            r'$M\ [M_\odot]$',
+            r'$\log\ M [M_\odot]$',
+            r'eigenvector',
+    ]
+
     nRows = 5
     nCols = len(colArr) + 1
     f, axArr = plt.subplots(nRows, nCols)
