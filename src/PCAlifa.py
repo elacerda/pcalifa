@@ -331,15 +331,26 @@ class PCAlifa:
         gs = gridspec.GridSpec(1, 2, width_ratios = [4, 7])
         ax1 = plt.subplot(gs[0])
         ax2 = plt.subplot(gs[1])
+
         ax1.set_title(r'tomogram $%02i$' % ti)
         im = ax1.imshow(tomogram, origin = 'lower', interpolation = 'nearest', aspect = 'auto')
         fig.colorbar(ax = ax1, mappable = im, use_gridspec = True)
+
         eigval_norm = 100. * eigval[ti] / eigval.sum()
         ax2.set_title(r'Eigenvalue $%s$ ($%.2f\ \%%$)' % (self.nToStrSciNot(eigval[ti]), eigval_norm))
         ax2.plot(x, y)
         ax2.xaxis.set_major_locator(MaxNLocator(20))
         ax2.set_ylabel(r'$PC %02i$' % ti)
         ax2.grid()
+
+#        bins = np.arange(0, 3 + 0.1, 0.1)
+#        bin_center = (bins[1:] + bins[:-1]) / 2.0
+#        pc__HLR = self.K.radialProfile(tomogram, bins)
+#        ax3 = plt.axes([0.2, 0.8, .2, .2], axisbg = 'y')
+#        ax3.plot(bin_center, pc__HLR)
+#        ax3.set_title(r'Radial Profile')
+#        ax3.set_xlabel(r'$R_{50}$')
+
         plt.tight_layout()
         fig.savefig('%stomo_%02i.png' % (npref, ti))
         plt.close()
@@ -368,11 +379,11 @@ class PCAlifa:
 
         return nStr
 
-    def sanityCheck(self, l, f, npref):
+    def sanityCheck(self, x, y, npref):
         f = plt.figure()
         f.set_size_inches(19.2, 10.8)
-        plt.plot(l, f)
-        plt.plot(l, f, 'r.')
+        plt.plot(x, y)
+        plt.plot(x, y, 'r.')
         plt.ylabel(r'Obs. flux $[erg/s/cm^2/\AA]$')
         plt.xlabel(r'Wavelength $[\AA]$')
         plt.title(r'Mask check (zone 0)')

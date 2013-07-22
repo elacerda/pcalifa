@@ -336,13 +336,13 @@ if __name__ == '__main__':
                                 read_basedir = True)
 
     gal = galaxy(base = PadovaSalp2000,
-                 side = 51,
+                 side = 21,
                  rpop = 10000.,
                  rint = 5.,
                  rdust = 1.,
                  Xo0 = 0.5,
                  tauV0 = 0.,
-                 extLawFile = '/home/lacerda/workspace/PCA/src/ExtLaws.out',
+                 extLawFile = '/home/lacerda/CALIFA/ExtLaws.out',
                  )
 
     ''' NOW Do what u want with GAL ;-) '''
@@ -428,8 +428,7 @@ if __name__ == '__main__':
         f = plt.figure(figsize = (19.8, 10.8))
         ax = f.gca()
 
-        P.zoneRebuildSpecAxisPlot(ax, gal.l, gal.fobs__il[i, :], f_reconstr__il[i, :],
-                                  eigVal__k, eigVec__lk, mask, npref, resid = False)
+        P.zoneRebuildSpecAxisPlot(ax, gal.l, gal.fobs__il[i, :], f_reconstr__il[i, :], eigVal__k, eigVec__lk, mask, npref, 10, False)
 
         f.savefig('%s_eVec-%s_rebSpec.png' % (npref, eigVecUsedStr.replace(' ', '-')))
         plt.close()
@@ -455,8 +454,7 @@ if __name__ == '__main__':
         f = plt.figure(figsize = (19.8, 10.8))
         ax = f.gca()
 
-        P.zoneRebuildSpecAxisPlot(ax, gal.l, gal.fobs__il[i, :], f_reconstr__il[i, :],
-                                  eigVal__k, eigVec__lk, mask, npref, resid = False)
+        P.zoneRebuildSpecAxisPlot(ax, gal.l, gal.fobs__il[i, :], f_reconstr__il[i, :], eigVal__k, eigVec__lk, mask, npref, 10, False)
 
         ax.set_ylabel('PC %s' % eigVecUsedStr)
         f.savefig('%s_eVec-%s_rebSpec.png' % (npref, eigVecUsedStr.replace(' ', '-')))
@@ -483,8 +481,7 @@ if __name__ == '__main__':
         f = plt.figure(figsize = (19.8, 10.8))
         ax = f.gca()
 
-        P.zoneRebuildSpecAxisPlot(ax, gal.l, gal.fobs__il[i, :], f_reconstr__il[i, :],
-                                  eigVal__k, eigVec__lk, mask, npref, resid = False)
+        P.zoneRebuildSpecAxisPlot(ax, gal.l, gal.fobs__il[i, :], f_reconstr__il[i, :], eigVal__k, eigVec__lk, mask, npref, 10, False)
 
         f.savefig('%s_eVec-%s_rebSpec.png' % (npref, eigVecUsedStr.replace(' ', '-')))
         plt.close()
