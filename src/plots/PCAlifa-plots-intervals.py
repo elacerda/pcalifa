@@ -131,6 +131,54 @@ def zoneRebuildSpec(iZone, evRebArr, l, O, tomo, eVec, eVal, mean, nPref, resid)
     f.savefig(fname)
     plt.close()
 
+def pixDevLineFluxRestFrame(l, res__lz, n_zone, model_line_flux_max = 6562.85, search_delta = 30):
+    model_line_flux_max = 6562.85
+    search_delta = 10.
+    llow = model_line_flux_max - search_delta
+    lup = model_line_flux_max + search_delta
+    lpixlow = np.where(l >= llow)[0][0]
+    lpixup = np.where(l <= lup)[0][-1]
+    line_max_lpix__z = lpixlow + res__lz[lpixlow:lpixup, :].argmax(axis = 0)
+    l_step = l[1] - l[0]
+    dim = np.ones((len(l), n_zone)).T
+    lmax__z = ((l * dim).T)[line_max_lpix__z][:, 0]
+    dl__z = lmax__z - model_line_flux_max
+    dpix__z = np.array((dl__z / l_step))
+
+    return dpix__z, dl__z
+
+def setLineFluxRestFrame(l, f_obs__lz, f_syn__lz, n_zone, restFramePixelDeviance__z):
+    interp_step = 0.01
+    dpix__z = np.array((1. / interp_step * restFramePixelDeviance__z), dtype = np.int)
+
+    l_pix = np.arange(0, len(l), 1)
+    l_interp_pix = np.arange(0, len(l), 0.01)
+
+    interp_f_obs__lz = np.zeros((len(l_interp_pix), n_zone))
+    interp_f_syn__lz = np.zeros((len(l_interp_pix), n_zone))
+    interp_f_obs_notroll__lz = np.zeros((len(l_interp_pix), n_zone))
+    interp_f_syn_notroll__lz = np.zeros((len(l_interp_pix), n_zone))
+
+    f_obs_rf__lz = np.zeros((len(l_pix), n_zone))
+    f_syn_rf__lz = np.zeros((len(l_pix), n_zone))
+
+    for z in range(n_zone):
+        dev = dpix__z[z]
+        interp_f_obs_notroll__lz[:, z] = np.interp(l_interp_pix, l_pix, f_obs__lz[:, z])
+        interp_f_syn_notroll__lz[:, z] = np.interp(l_interp_pix, l_pix, f_syn__lz[:, z])
+
+        interp_f_obs__lz[:, z] = np.roll(interp_f_obs_notroll__lz[:, z], dev)
+        interp_f_syn__lz[:, z] = np.roll(interp_f_syn_notroll__lz[:, z], dev)
+
+        if dev < 0:
+            interp_f_obs__lz[dev:, z] = interp_f_obs_notroll__lz[dev:, z].mean()
+            interp_f_syn__lz[dev:, z] = interp_f_syn_notroll__lz[dev:, z].mean()
+
+        f_obs_rf__lz[:, z] = np.interp(l_pix, l_interp_pix, interp_f_obs__lz[:, z])
+        f_syn_rf__lz[:, z] = np.interp(l_pix, l_interp_pix, interp_f_syn__lz[:, z])
+
+    return f_obs_rf__lz, f_syn_rf__lz
+
 if __name__ == '__main__':
     args = parser_args()
 
@@ -187,8 +235,8 @@ if __name__ == '__main__':
         P.screeTestPlot(eigVal_res_norm__k, args.tmax, npref_f_res_norm, '%s RES NORM' % P.K.califaID)
 
         for ti in range(args.tmax):
-            P.tomoPlot(tomo_res__kyx, l_obs, eigVec_res__lk, eigVal_res__k, ti, npref_f_res)
-            P.tomoPlot(tomo_res_norm__kyx, l_obs, eigVec_res_norm__lk, eigVal_res_norm__k, ti, npref_f_res_norm)
+            P.tomoPlot(tomo_res__kyx, l_obs, eigVec_res__lk, eigVal_res__k, ms_res__l, ti, npref_f_res)
+            P.tomoPlot(tomo_res_norm__kyx, l_obs, eigVec_res_norm__lk, eigVal_res_norm__k, ms_res_norm__l, ti, npref_f_res_norm)
 
     ####################################################################################
     ################################ Rebuild Intervals #################################  

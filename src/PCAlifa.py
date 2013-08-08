@@ -30,14 +30,21 @@ class PCAlifa:
         self._initVars()
 
         if califaID:
-            self.readCALIFACube(self.califaID, fitsDir, quantilQFlag, lc)
+            self.readCALIFACube(self.califaID, fitsDir)
 
-    def readCALIFACube(self, califaID, fitsDir = fitsDirDefault, quantilQFlag = quantilFlagDefault, lc = []):
+            if len(lc):
+                self.setLambdaConstrains(lc)
+
+            self.quantilQFlag = quantilQFlag
+
+            if quantilQFlag:
+                self.setQFlag(quantilQFlag)
+
+    def readCALIFACube(self, califaID, fitsDir = fitsDirDefault):
         self.califaID = califaID
 
         self._initVars()
 
-        self.quantilQFlag = quantilQFlag
         self.fitsDir = fitsDir
         self.fitsFile = '%s/%s/%s%s' % (fitsDir, califaID, califaID, fitsFilenameSuffix)
 
@@ -49,11 +56,61 @@ class PCAlifa:
 
         self._setVars()
 
-        if len(lc):
-            self.setLambdaConstrains(lc)
-
-        if quantilQFlag:
-            self.setQFlag(quantilQFlag)
+#    def pixDevLineFluxRestFrame(self, modelLineFluxMax = 6562.85, searchRange = 30):
+#        self.restFrameLine = modelLineFluxMax
+#
+#        K = self.K
+#
+#        modelLineFluxMax = 6562.85
+#        searchRange = 10.
+#        l_obs = K.l_obs
+#        res__lz = (K.f_obs - K.f_syn)
+#        llow = modelLineFluxMax - searchRange
+#        lup = modelLineFluxMax + searchRange
+#        lpixlow = np.where(l_obs >= llow)[0][0]
+#        lpixup = np.where(l_obs <= lup)[0][-1]
+#        line_max_lpix__z = lpixlow + res__lz[lpixlow:lpixup, :].argmax(axis = 0)
+#        l_step = l_obs[1] - l_obs[0]
+#        dim = np.ones((len(l_obs), K.N_zone)).T
+#        lmax__z = ((l_obs * dim).T)[line_max_lpix__z][:, 0]
+#        dpix__z = np.array(((lmax__z - modelLineFluxMax) / l_step))
+#        self.restFramePixelDeviance__z = dpix__z
+#        self.restFrameLambdaDeviance__z = lmax__z - modelLineFluxMax
+#
+#    def setLineFluxRestFrame(self):
+#        K = self.K
+#        interp_step = 0.01
+#        dpix__z = np.array((1. / interp_step * self.restFramePixelDeviance__z), dtype = np.int)
+#
+#        l_obs = K.l_obs
+#        l_obs_pix = np.arange(0, len(l_obs), 1)
+#        l_interp_pix = np.arange(0, len(l_obs), 0.01)
+#
+#        interp_f_obs__lz = np.zeros((len(l_interp_pix), K.N_zone))
+#        interp_f_syn__lz = np.zeros((len(l_interp_pix), K.N_zone))
+#        interp_f_obs_notroll__lz = np.zeros((len(l_interp_pix), K.N_zone))
+#        interp_f_syn_notroll__lz = np.zeros((len(l_interp_pix), K.N_zone))
+#
+#        f_obs_rf__lz = np.zeros((len(l_obs_pix), K.N_zone))
+#        f_syn_rf__lz = np.zeros((len(l_obs_pix), K.N_zone))
+#
+#        for z in range(K.N_zone):
+#            dev = dpix__z[z]
+#            interp_f_obs_notroll__lz[:, z] = np.interp(l_interp_pix, l_obs_pix, K.f_obs[:, z])
+#            interp_f_syn_notroll__lz[:, z] = np.interp(l_interp_pix, l_obs_pix, K.f_syn[:, z])
+#
+#            interp_f_obs__lz[:, z] = np.roll(interp_f_obs_notroll__lz[:, z], dev)
+#            interp_f_syn__lz[:, z] = np.roll(interp_f_syn_notroll__lz[:, z], dev)
+#
+#            if dev < 0:
+#                interp_f_obs__lz[dev:, z] = interp_f_obs_notroll__lz[dev:, z].mean()
+#                interp_f_syn__lz[dev:, z] = interp_f_syn_notroll__lz[dev:, z].mean()
+#
+#            f_obs_rf__lz[:, z] = np.interp(l_obs_pix, l_interp_pix, interp_f_obs__lz[:, z])
+#            f_syn_rf__lz[:, z] = np.interp(l_obs_pix, l_interp_pix, interp_f_syn__lz[:, z])
+#
+#        self.f_obs_rf__zl = f_obs_rf__lz.T
+#        self.f_syn_rf__zl = f_syn_rf__lz.T
 
     def PCA(self, arr, num, axis = -1, arrMean = False):
         if not arrMean:
@@ -120,12 +177,12 @@ class PCAlifa:
         self.tomograms_syn()
         self.tomograms_syn_norm()
 
-    def tomogram(self, I, eigVec, extensive = True):
+    def tomogram(self, I, eigVec):
         t__zk = np.dot(I, eigVec)
         t__kyx = False
 
         if self.califaID:
-            t__kyx = self.K.zoneToYX(t__zk.T, extensive = extensive)
+            t__kyx = self.K.zoneToYX(t__zk.T, extensive = False)
 
         return t__zk, t__kyx
 
@@ -322,10 +379,11 @@ class PCAlifa:
 
             plt.setp(ax.get_yticklabels(), visible = False)
 
-    def tomoPlot(self, t, l, eigvec, eigval, ti, npref):
+    def tomoPlot(self, t, l, eigvec, eigval, ms, ti, npref):
         tomogram = t[ti, :, :]
         x = l
         y = eigvec[:, ti]
+        y2 = ms
 
         fig = plt.figure(figsize = (15, 5))
         gs = gridspec.GridSpec(1, 2, width_ratios = [4, 7])
@@ -342,6 +400,10 @@ class PCAlifa:
         ax2.xaxis.set_major_locator(MaxNLocator(20))
         ax2.set_ylabel(r'$PC %02i$' % ti)
         ax2.grid()
+
+        ax3 = ax2.twinx()
+        ax3.plot(x, y2, color = '0.55')
+        ax3.set_ylabel(r'Mean spetrum')
 
 #        bins = np.arange(0, 3 + 0.1, 0.1)
 #        bin_center = (bins[1:] + bins[:-1]) / 2.0

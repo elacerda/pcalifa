@@ -160,6 +160,11 @@ if __name__ == '__main__':
 
     #### SANITY CHECK ####
     P.sanityCheck(P.l_obs, P.f_obs__zl[0, :], npref_f_obs)
+    P.sanityCheck(P.l_obs, P.f_obs_norm__zl[0, :], npref_f_obs_norm)
+    P.sanityCheck(P.l_syn, P.f_syn__zl[0, :], npref_f_syn)
+    P.sanityCheck(P.l_syn, P.f_syn_norm__zl[0, :], npref_f_syn_norm)
+    P.sanityCheck(P.l_obs, P.f_res__zl[0, :], npref_f_res)
+    P.sanityCheck(P.l_obs, P.f_res_norm__zl[0, :], npref_f_res_norm)
     ######################
 
 #########################################################################
@@ -174,12 +179,12 @@ if __name__ == '__main__':
         P.screeTestPlot(P.eigVal_res_norm__k, args.tmax, npref_f_res_norm, '%s RES NORM' % P.K.califaID)
 
         for ti in range(args.tmax):
-            P.tomoPlot(P.tomo_obs__kyx, P.l_obs, P.eigVec_obs__lk, P.eigVal_obs__k, ti, npref_f_obs)
-            P.tomoPlot(P.tomo_obs_norm__kyx, P.l_obs, P.eigVec_obs_norm__lk, P.eigVal_obs_norm__k, ti, npref_f_obs_norm)
-            P.tomoPlot(P.tomo_syn__kyx, P.l_syn, P.eigVec_syn__lk, P.eigVal_syn__k, ti, npref_f_syn)
-            P.tomoPlot(P.tomo_syn_norm__kyx, P.l_syn, P.eigVec_syn_norm__lk, P.eigVal_syn_norm__k, ti, npref_f_syn_norm)
-            P.tomoPlot(P.tomo_res__kyx, P.l_obs, P.eigVec_res__lk, P.eigVal_res__k, ti, npref_f_res)
-            P.tomoPlot(P.tomo_res_norm__kyx, P.l_obs, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, ti, npref_f_res_norm)
+            P.tomoPlot(P.tomo_obs__kyx, P.l_obs, P.eigVec_obs__lk, P.eigVal_obs__k, P.ms_obs__l, ti, npref_f_obs)
+            P.tomoPlot(P.tomo_obs_norm__kyx, P.l_obs, P.eigVec_obs_norm__lk, P.eigVal_obs_norm__k, P.ms_obs_norm__l, ti, npref_f_obs_norm)
+            P.tomoPlot(P.tomo_syn__kyx, P.l_syn, P.eigVec_syn__lk, P.eigVal_syn__k, P.ms_syn__l, ti, npref_f_syn)
+            P.tomoPlot(P.tomo_syn_norm__kyx, P.l_syn, P.eigVec_syn_norm__lk, P.eigVal_syn_norm__k, P.ms_syn_norm__l, ti, npref_f_syn_norm)
+            P.tomoPlot(P.tomo_res__kyx, P.l_obs, P.eigVec_res__lk, P.eigVal_res__k, P.ms_res__l, ti, npref_f_res)
+            P.tomoPlot(P.tomo_res_norm__kyx, P.l_obs, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, P.ms_res_norm__l, ti, npref_f_res_norm)
 
 #########################################################################
 #########################################################################
@@ -460,10 +465,10 @@ if __name__ == '__main__':
         P.screeTestPlot(eigVal_syn_norm__k, args.tmax, npref_f_syn_norm, '%s LOG FSYN NORM' % P.K.califaID)
 
         for ti in range(args.tmax):
-            P.tomoPlot(tomo_obs__kyx, P.l_obs, eigVec_obs__lk, eigVal_obs__k, ti, npref_f_obs)
-            P.tomoPlot(tomo_obs_norm__kyx, P.l_obs, eigVec_obs_norm__lk, eigVal_obs_norm__k, ti, npref_f_obs_norm)
-            P.tomoPlot(tomo_syn__kyx, P.l_syn, eigVec_syn__lk, eigVal_syn__k, ti, npref_f_syn)
-            P.tomoPlot(tomo_syn_norm__kyx, P.l_syn, eigVec_syn_norm__lk, eigVal_syn_norm__k, ti, npref_f_syn_norm)
+            P.tomoPlot(tomo_obs__kyx, P.l_obs, eigVec_obs__lk, eigVal_obs__k, ms_obs__l, ti, npref_f_obs)
+            P.tomoPlot(tomo_obs_norm__kyx, P.l_obs, eigVec_obs_norm__lk, eigVal_obs_norm__k, ms_obs_norm__l, ti, npref_f_obs_norm)
+            P.tomoPlot(tomo_syn__kyx, P.l_syn, eigVec_syn__lk, eigVal_syn__k, ms_syn__l, ti, npref_f_syn)
+            P.tomoPlot(tomo_syn_norm__kyx, P.l_syn, eigVec_syn_norm__lk, eigVal_syn_norm__k, ms_syn_norm__l, ti, npref_f_syn_norm)
 
 
 #########################################################################
