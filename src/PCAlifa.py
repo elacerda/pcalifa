@@ -15,10 +15,10 @@ from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-plt.rcParams.update({'font.family' : 'Times New Roman',
-                     'text.usetex' : False,
-                     'backend' : 'ps'
-                     })
+# plt.rcParams.update({'font.family' : 'Times New Roman',
+#                     'text.usetex' : False,
+#                     'backend' : 'ps'
+#                     })
 
 fitsDirDefault = '/home/lacerda/CALIFA/gal_fits'
 quantilFlagDefault = 0.9

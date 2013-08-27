@@ -7,8 +7,26 @@ import argparse as ap
 import numpy as np
 import PCAlifa as PCA
 from astropy.io import fits
+from matplotlib import pyplot as plt
+import matplotlib.gridspec as gridspec
+from matplotlib.ticker import MaxNLocator
 
 gasFileSuffix = '_synthesis_eBR_v20_q036.d13c512.ps03.k2.mC.CCM.Bgsd61.EML.MC100.fits'
+
+def zoneToYX(prop, mask, qMask, qZones, fill_value):
+    new_shape = prop.shape[:-1] + qMask.shape
+    prop__yx = np.empty(new_shape, dtype = prop.dtype)
+
+    for zone in np.where(mask == False)[-1]:
+        arr = np.where(qZones == zone)
+        y = arr[0][0]
+        x = arr[-1][0]
+        print zone, y, x
+        qMask[y, x] = False
+
+    prop__yx[..., qMask] = prop[..., qZones[qMask]]
+    prop__yx[..., ~qMask] = fill_value
+    return qMask, prop__yx
 
 def parser_args():
     parser = ap.ArgumentParser(description = 'PCAlifa - correlations')
@@ -20,7 +38,7 @@ def parser_args():
                         help = 'Califa FITS directory',
                         metavar = 'DIR',
                         type = str,
-                        default = '/home/lacerda/CALIFA')
+                        default = '/home/lacerda/CALIFA/gal_fits/')
     parser.add_argument('--gasFitsDir', '-g',
                         help = 'Califa Gas FITS directory',
                         metavar = 'DIR',
@@ -69,38 +87,144 @@ def parseArrArgs(args, lastZone):
     args.zones.append(lastZone)
     args.zonesArr = np.array(args.zones)
 
+def tomoPlot(t, l, eigvec, eigval, ms, ti, npref):
+    P = PCA.PCAlifa()
+    tomogram = t[ti, :, :]
+    x = l
+    y = eigvec[:, ti]
+    y2 = ms
+
+    N = len(l)
+    ind = np.arange(N)
+    width = 0.35
+
+    fig = plt.figure(figsize = (15, 5))
+    gs = gridspec.GridSpec(1, 2, width_ratios = [4, 7])
+    ax1 = plt.subplot(gs[0])
+    ax2 = plt.subplot(gs[1])
+
+    ax1.set_title(r'tomogram $%02i$' % ti)
+    im = ax1.imshow(tomogram, origin = 'lower', interpolation = 'nearest', aspect = 'auto')
+    fig.colorbar(ax = ax1, mappable = im, use_gridspec = True)
+
+    eigval_norm = 100. * eigval[ti] / eigval.sum()
+    ax2.set_title(r'Eigenvalue $%s$ ($%.2f\ \%%$)' % (P.nToStrSciNot(eigval[ti]), eigval_norm))
+    ax2.bar(ind, y)
+    ax2.set_xticks(ind + width)
+    ax2.set_xticklabels(l)
+    ax2.set_ylabel(r'$PC %02i$' % ti)
+
+#    plt.setp(xticsNames, rotation = 45)
+#    ax2.xaxis.set_major_locator(MaxNLocator(len(l)))
+#    ax2.grid()
+
+#    ax3 = ax2.twinx()
+#    ax3.plot(np.arange(len(y2)), y2, 'o', color = '0.55')
+#    ax3.vlines(np.arange(len(y2)), [0], y2)
+#    ax3.set_ylabel(r'Mean spetrum')
+
+    plt.setp(ax2, xticklabels = l)
+    plt.tight_layout()
+    fig.savefig('%stomo_%02i.png' % (npref, ti))
+    plt.close()
+
 if __name__ == '__main__':
     args = parser_args()
+    args.califaID = 'K0277'
+    args.correlat = True
+    args.tomograms = True
 
+    # This call of PCAlifa is only to use P.K.zoneToYX(), P.K.N_zone and PCA methods;
     P = PCA.PCAlifa(args.califaID, args.fitsDir, False)
 
     parseArrArgs(args, P.K.N_zone - 1)
-    # This call of PCAlifa is only to use P.K.zoneToYX(), P.K.N_zone and PCA methods;
+
     hdu = fits.open('%s/%s%s' % (args.gasFitsDir, args.califaID, gasFileSuffix))
 
     l = []
 
     n_hdu = len(hdu)
-    n_data = n_hdu - 2
+
+    corelines = ['4861', '5007', '6563', '6583']
+    othlines = ['3727', '6300', '6717', '6731']
+    totlines = corelines + othlines
+
+    n_data = len(totlines)
+
+    '''
+    Como n_data eh a dimensao de componentes principais e esse numero eh pequeno
+    o argumento --tmax eh redefinido para n_data.
+    '''
+    args.tmax = n_data
 
     flux__lz = np.zeros((n_data, P.K.N_zone))
     fwhm__lz = np.zeros((n_data, P.K.N_zone))
     ew__lz = np.zeros((n_data, P.K.N_zone))
 
     # Building the data arrays
-    for i in range(n_data):
-        j = i + 2
-        flux__lz[i] = np.array(object = hdu[j].data['flux'], dtype = hdu[j].data.dtype['flux'])
-        fwhm__lz[i] = np.array(object = hdu[j].data['fwhm'], dtype = hdu[j].data.dtype['fwhm'])
-        ew__lz[i] = np.array(object = hdu[j].data['EW'], dtype = hdu[j].data.dtype['EW'])
+    j = 0
+    lines = totlines
 
-        l.append(hdu[j].header['EXTNAME'])
+    fluxH__lz = {}
+    fwhmH__lz = {}
+    ewH__lz = {}
+
+    lineindex = {}
+
+    for i in range(n_hdu):
+        for line in lines:
+            if hdu[i].name == line:
+                flux__lz[j] = np.array(object = hdu[i].data['flux'], dtype = hdu[i].data.dtype['flux'])
+                fwhm__lz[j] = np.array(object = hdu[i].data['fwhm'], dtype = hdu[i].data.dtype['fwhm'])
+                ew__lz[j] = np.array(object = hdu[i].data['EW'], dtype = hdu[i].data.dtype['EW'])
+
+                fluxH__lz[line] = flux__lz[j]
+                fwhmH__lz[line] = fwhm__lz[j]
+                ewH__lz[line] = ew__lz[j]
+
+                lineindex[line] = j
+
+                l.append(hdu[i].name)
+                j = j + 1
+
+    maskcore = (fluxH__lz['4861'] > 0) & (fluxH__lz['5007'] > 0) & (fluxH__lz['6563'] > 0) & (fluxH__lz['6583'] > 0)
+    maskoth = (fluxH__lz['3727'] > 0) & (fluxH__lz['6300'] > 0) & (fluxH__lz['6717'] > 0) & (fluxH__lz['6731'] > 0)
+    masktot = (maskcore) & (maskoth)
+    maskHa = (fluxH__lz['6563'] > 0)
+
+    maskHa__lz = (maskHa & np.ones(flux__lz.shape, dtype = np.bool))
+#     fluxH_m__lz = {}
+#     fwhmH_m__lz = {}
+#     ewH_m__lz = {}
+#
+#     for line in totlines:
+#         fluxH_m__lz[line] = flux__lz[lineindex[line], maskHa]
+#         fwhmH_m__lz[line] = fwhm__lz[lineindex[line], maskHa]
+#         ewH_m__lz[line] = ew__lz[lineindex[line], maskHa]
+#
+
+    flux_m__lz = np.ma.array(flux__lz, mask = maskHa__lz, fill_value = np.nan)
+    fwhm_m__lz = np.ma.array(fwhm__lz, mask = maskHa__lz, fill_value = np.nan)
+    ew_m__lz = np.ma.array(ew__lz, mask = maskHa__lz, fill_value = np.nan)
+
+    for line in totlines:
+        fluxH__lz[line] = flux_m__lz[lineindex[line]]
+        fwhmH__lz[line] = fwhm_m__lz[lineindex[line]]
+        ewH__lz[line] = ew_m__lz[lineindex[line]]
 
     l = np.array(l, dtype = np.int)
 
-    I_flux__zl, ms_flux__l, covMat_flux__ll, eigVal_flux__k, eigVec_flux__lk = P.PCA(flux__lz.T, P.K.N_zone, 0)
-    I_fwhm__zl, ms_fwhm__l, covMat_fwhm__ll, eigVal_fwhm__k, eigVec_fwhm__lk = P.PCA(fwhm__lz.T, P.K.N_zone, 0)
-    I_ew__zl, ms_ew__l, covMat_ew__ll, eigVal_ew__k, eigVec_ew__lk = P.PCA(ew__lz.T, P.K.N_zone, 0)
+    I_flux__zl, ms_flux__l, covMat_flux__ll, eigVal_flux__k, eigVec_flux__lk = P.PCA(flux_m__lz.T, P.K.N_zone, 0)
+    I_fwhm__zl, ms_fwhm__l, covMat_fwhm__ll, eigVal_fwhm__k, eigVec_fwhm__lk = P.PCA(fwhm_m__lz.T, P.K.N_zone, 0)
+    I_ew__zl, ms_ew__l, covMat_ew__ll, eigVal_ew__k, eigVec_ew__lk = P.PCA(ew_m__lz.T, P.K.N_zone, 0)
+
+#     tomo_flux__zk = np.dot(I_flux__zl, eigVec_flux__lk)
+#     tomo_fwhm__zk = np.dot(I_fwhm__zl, eigVec_fwhm__lk)
+#     tomo_ew__zk = np.dot(I_ew__zl, eigVec_ew__lk)
+#
+#     new_qMask, tomo_flux__kyx = zoneToYX(tomo_flux__zk.T, maskHa, P.K.qMask, P.K.qZones, P.K.fill_value)
+#     new_qMask, tomo_fwhm__kyx = zoneToYX(tomo_fwhm__zk.T, maskHa, P.K.qMask, P.K.qZones, P.K.fill_value)
+#     new_qMask, tomo_ew__kyx = zoneToYX(tomo_ew__zk.T, maskHa, P.K.qMask, P.K.qZones, P.K.fill_value)
 
     tomo_flux__zk, tomo_flux__kyx = P.tomogram(I_flux__zl, eigVec_flux__lk)
     tomo_fwhm__zk, tomo_fwhm__kyx = P.tomogram(I_fwhm__zl, eigVec_fwhm__lk)
@@ -121,6 +245,67 @@ if __name__ == '__main__':
         P.screeTestPlot(eigVal_ew__k, args.tmax, npref_ew, '%s ew' % P.K.califaID)
 
         for ti in range(args.tmax):
-            P.tomoPlot(tomo_flux__kyx, l, eigVec_flux__lk, eigVal_flux__k, ms_flux__l, ti, npref_flux)
-            P.tomoPlot(tomo_fwhm__kyx, l, eigVec_fwhm__lk, eigVal_fwhm__k, ms_fwhm__l, ti, npref_fwhm)
-            P.tomoPlot(tomo_ew__kyx, l, eigVec_ew__lk, eigVal_ew__k, ms_ew__l, ti, npref_ew)
+            tomoPlot(tomo_flux__kyx, l, eigVec_flux__lk, eigVal_flux__k, ms_flux__l, ti, npref_flux)
+            tomoPlot(tomo_fwhm__kyx, l, eigVec_fwhm__lk, eigVal_fwhm__k, ms_fwhm__l, ti, npref_fwhm)
+            tomoPlot(tomo_ew__kyx, l, eigVec_ew__lk, eigVal_ew__k, ms_ew__l, ti, npref_ew)
+
+    if args.correlat:
+        logO3Hb = np.log10(fluxH__lz['5007'] / fluxH__lz['4861'])
+        logN2Ha = np.log10(fluxH__lz['6583'] / fluxH__lz['6563'])
+        logHaHb = np.log10(fluxH__lz['6563'] / fluxH__lz['4861'])
+        logS2S2 = np.log10(fluxH__lz['6717'] / fluxH__lz['6731'])
+
+        colArr = [
+                  logO3Hb,
+                  logN2Ha,
+                  logO3Hb - logO3Hb,
+                  logHaHb,
+                  logS2S2,
+        ]
+
+        colNames = [
+            r'$\log\ F_{[OIII]} / F_{H\beta}$',
+            r'$\log\ F_{[NII]} / F_{H\alpha}$',
+            r'$\log\ (F_{[OIII]} / F_{H\beta}) / (F_{[NII]} / F_{H\alpha})$',
+            r'$\log\ F_{H\alpha} / F_{H\beta}$',
+            r'$\log\ F_{6717} / F_{6731}$',
+            r'eigenvector',
+        ]
+
+        nRows = args.tmax
+        nCols = len(colArr) + 1
+
+        ###############################
+        ###############################
+        ###############################
+
+        f, axArr = plt.subplots(nRows, nCols)
+        f.set_size_inches(19.2, 10.8)
+
+        N = len(l)
+        ind = np.arange(N)
+        width = 0.35
+
+        for i in range(nRows):
+            axArr[i, 0].set_ylabel('PC%d' % i)
+
+            for j in range(nCols)[:-1]:
+                P.correlationAxisPlot(colArr[j], np.log10(tomo_flux__zk[:, i]), axArr[i, j])
+
+            axArr[i, nCols - 1].bar(ind, eigVec_flux__lk[:, i])
+            axArr[i, nCols - 1].set_xticks(ind + width)
+            axArr[i, nCols - 1].set_xticklabels(l)
+            plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
+
+        f.subplots_adjust(hspace = 0.0)
+        f.subplots_adjust(wspace = 0.05)
+
+        plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
+        plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
+
+        for i in range(nCols):
+            axArr[0, i].set_title(colNames[i])
+
+        plt.suptitle(r'Correlations - Flux')
+        f.savefig('%s-corre_flux.png' % P.K.califaID)
+        plt.close()
