@@ -13,21 +13,6 @@ from matplotlib.ticker import MaxNLocator
 
 gasFileSuffix = '_synthesis_eBR_v20_q036.d13c512.ps03.k2.mC.CCM.Bgsd61.EML.MC100.fits'
 
-def zoneToYX(prop, mask, qMask, qZones, fill_value):
-    new_shape = prop.shape[:-1] + qMask.shape
-    prop__yx = np.empty(new_shape, dtype = prop.dtype)
-
-    for zone in np.where(mask == False)[-1]:
-        arr = np.where(qZones == zone)
-        y = arr[0][0]
-        x = arr[-1][0]
-        print zone, y, x
-        qMask[y, x] = False
-
-    prop__yx[..., qMask] = prop[..., qZones[qMask]]
-    prop__yx[..., ~qMask] = fill_value
-    return qMask, prop__yx
-
 def parser_args():
     parser = ap.ArgumentParser(description = 'PCAlifa - correlations')
     parser.add_argument('--califaID', '-c',
@@ -130,9 +115,9 @@ def tomoPlot(t, l, eigvec, eigval, ms, ti, npref):
 
 if __name__ == '__main__':
     args = parser_args()
-    args.califaID = 'K0277'
     args.correlat = True
     args.tomograms = True
+    args.califaID = 'K0277'
 
     # This call of PCAlifa is only to use P.K.zoneToYX(), P.K.N_zone and PCA methods;
     P = PCA.PCAlifa(args.califaID, args.fitsDir, False)
@@ -145,7 +130,7 @@ if __name__ == '__main__':
 
     n_hdu = len(hdu)
 
-    corelines = ['4861', '5007', '6563', '6583']
+    corelines = ['4861', '5007', '6583']
     othlines = ['3727', '6300', '6717', '6731']
     totlines = corelines + othlines
 
@@ -160,71 +145,77 @@ if __name__ == '__main__':
     flux__lz = np.zeros((n_data, P.K.N_zone))
     fwhm__lz = np.zeros((n_data, P.K.N_zone))
     ew__lz = np.zeros((n_data, P.K.N_zone))
+    eflux__lz = np.zeros((n_data, P.K.N_zone))
 
     # Building the data arrays
     j = 0
     lines = totlines
 
-    fluxH__lz = {}
-    fwhmH__lz = {}
-    ewH__lz = {}
-
     lineindex = {}
 
+    f_Ha = False
+
     for i in range(n_hdu):
+        if not f_Ha and hdu[i].name == '6563':
+            f_Ha__z = np.array(object = hdu[i].data['flux'], dtype = hdu[i].data.dtype['flux'])
+            ef_Ha__z = np.array(object = hdu[i].data['eflux'], dtype = hdu[i].data.dtype['eflux'])
+
+            f_Ha = True
+
         for line in lines:
             if hdu[i].name == line:
                 flux__lz[j] = np.array(object = hdu[i].data['flux'], dtype = hdu[i].data.dtype['flux'])
                 fwhm__lz[j] = np.array(object = hdu[i].data['fwhm'], dtype = hdu[i].data.dtype['fwhm'])
                 ew__lz[j] = np.array(object = hdu[i].data['EW'], dtype = hdu[i].data.dtype['EW'])
-
-                fluxH__lz[line] = flux__lz[j]
-                fwhmH__lz[line] = fwhm__lz[j]
-                ewH__lz[line] = ew__lz[j]
+                eflux__lz[j] = np.array(object = hdu[i].data['eflux'], dtype = hdu[i].data.dtype['eflux'])
 
                 lineindex[line] = j
 
                 l.append(hdu[i].name)
                 j = j + 1
 
-    maskcore = (fluxH__lz['4861'] > 0) & (fluxH__lz['5007'] > 0) & (fluxH__lz['6563'] > 0) & (fluxH__lz['6583'] > 0)
-    maskoth = (fluxH__lz['3727'] > 0) & (fluxH__lz['6300'] > 0) & (fluxH__lz['6717'] > 0) & (fluxH__lz['6731'] > 0)
-    masktot = (maskcore) & (maskoth)
-    maskHa = (fluxH__lz['6563'] > 0)
-
-    maskHa__lz = (maskHa & np.ones(flux__lz.shape, dtype = np.bool))
-#     fluxH_m__lz = {}
-#     fwhmH_m__lz = {}
-#     ewH_m__lz = {}
-#
-#     for line in totlines:
-#         fluxH_m__lz[line] = flux__lz[lineindex[line], maskHa]
-#         fwhmH_m__lz[line] = fwhm__lz[lineindex[line], maskHa]
-#         ewH_m__lz[line] = ew__lz[lineindex[line], maskHa]
-#
-
-    flux_m__lz = np.ma.array(flux__lz, mask = maskHa__lz, fill_value = np.nan)
-    fwhm_m__lz = np.ma.array(fwhm__lz, mask = maskHa__lz, fill_value = np.nan)
-    ew_m__lz = np.ma.array(ew__lz, mask = maskHa__lz, fill_value = np.nan)
-
-    for line in totlines:
-        fluxH__lz[line] = flux_m__lz[lineindex[line]]
-        fwhmH__lz[line] = fwhm_m__lz[lineindex[line]]
-        ewH__lz[line] = ew_m__lz[lineindex[line]]
-
     l = np.array(l, dtype = np.int)
 
-    I_flux__zl, ms_flux__l, covMat_flux__ll, eigVal_flux__k, eigVec_flux__lk = P.PCA(flux_m__lz.T, P.K.N_zone, 0)
+
+
+
+    ########### MASKS ###########
+    mask = (flux__lz[lineindex['4861']] > 0) & (flux__lz[lineindex['5007']] > 0)
+    mask &= (f_Ha__z > 0) & (flux__lz[lineindex['6583']] > 0)
+    mask &= (flux__lz[lineindex['3727']] > 0) & (flux__lz[lineindex['6300']] > 0)
+    mask &= (flux__lz[lineindex['6717']] > 0) & (flux__lz[lineindex['6731']] > 0)
+    mask &= (eflux__lz[lineindex['4861']] > 0)
+
+    maskHa = (f_Ha__z > 0) & (ef_Ha__z > 0)
+
+    SNHa = f_Ha__z / ef_Ha__z
+    SNHb = flux__lz[lineindex['4861']] / eflux__lz[lineindex['4861']]
+    SNO1 = flux__lz[lineindex['6300']] / eflux__lz[lineindex['6300']]
+    SNO3 = flux__lz[lineindex['5007']] / eflux__lz[lineindex['5007']]
+
+    masklines = mask & maskHa
+
+    masklines = mask & maskHa & (SNHb >= 3.0)
+    print "Galaxia com %i zonas. %i mascaradas" % (P.K.N_zone, P.K.N_zone - np.where(masklines == True)[0].shape[0])
+    masklines__lz = ~(masklines & np.ones(flux__lz.shape, dtype = np.bool))
+
+
+
+    ########### MASKED DATA ###########
+    flux_m__lz = np.ma.array(flux__lz, mask = masklines__lz, fill_value = np.nan)
+    flux_m_normHa__lz = np.ma.array(flux__lz, mask = masklines__lz, fill_value = np.nan)
+    fwhm_m__lz = np.ma.array(fwhm__lz, mask = masklines__lz, fill_value = np.nan)
+    ew_m__lz = np.ma.array(ew__lz, mask = masklines__lz, fill_value = np.nan)
+
+    flux_m_normHa__lz = flux_m_normHa__lz / f_Ha__z
+
+
+
+    ########### PCA ###########
+    I_flux__zl, ms_flux__l, covMat_flux__ll, eigVal_flux__k, eigVec_flux__lk = P.PCA(flux_m_normHa__lz.T, P.K.N_zone, 0)
+    # I_flux__zl, ms_flux__l, covMat_flux__ll, eigVal_flux__k, eigVec_flux__lk = P.PCA(flux_m__lz.T, P.K.N_zone, 0)
     I_fwhm__zl, ms_fwhm__l, covMat_fwhm__ll, eigVal_fwhm__k, eigVec_fwhm__lk = P.PCA(fwhm_m__lz.T, P.K.N_zone, 0)
     I_ew__zl, ms_ew__l, covMat_ew__ll, eigVal_ew__k, eigVec_ew__lk = P.PCA(ew_m__lz.T, P.K.N_zone, 0)
-
-#     tomo_flux__zk = np.dot(I_flux__zl, eigVec_flux__lk)
-#     tomo_fwhm__zk = np.dot(I_fwhm__zl, eigVec_fwhm__lk)
-#     tomo_ew__zk = np.dot(I_ew__zl, eigVec_ew__lk)
-#
-#     new_qMask, tomo_flux__kyx = zoneToYX(tomo_flux__zk.T, maskHa, P.K.qMask, P.K.qZones, P.K.fill_value)
-#     new_qMask, tomo_fwhm__kyx = zoneToYX(tomo_fwhm__zk.T, maskHa, P.K.qMask, P.K.qZones, P.K.fill_value)
-#     new_qMask, tomo_ew__kyx = zoneToYX(tomo_ew__zk.T, maskHa, P.K.qMask, P.K.qZones, P.K.fill_value)
 
     tomo_flux__zk, tomo_flux__kyx = P.tomogram(I_flux__zl, eigVec_flux__lk)
     tomo_fwhm__zk, tomo_fwhm__kyx = P.tomogram(I_fwhm__zl, eigVec_fwhm__lk)
@@ -250,15 +241,15 @@ if __name__ == '__main__':
             tomoPlot(tomo_ew__kyx, l, eigVec_ew__lk, eigVal_ew__k, ms_ew__l, ti, npref_ew)
 
     if args.correlat:
-        logO3Hb = np.log10(fluxH__lz['5007'] / fluxH__lz['4861'])
-        logN2Ha = np.log10(fluxH__lz['6583'] / fluxH__lz['6563'])
-        logHaHb = np.log10(fluxH__lz['6563'] / fluxH__lz['4861'])
-        logS2S2 = np.log10(fluxH__lz['6717'] / fluxH__lz['6731'])
+        logO3Hb = np.log10(flux_m__lz[lineindex['5007']] / flux_m__lz[lineindex['4861']])
+        logN2Ha = np.log10(flux_m__lz[lineindex['6583']] / f_Ha__z)
+        logHaHb = np.log10(f_Ha__z / flux_m__lz[lineindex['4861']])
+        logS2S2 = np.log10(flux_m__lz[lineindex['6717']] / flux_m__lz[lineindex['6731']])
 
         colArr = [
                   logO3Hb,
                   logN2Ha,
-                  logO3Hb - logO3Hb,
+                  logO3Hb - logN2Ha,
                   logHaHb,
                   logS2S2,
         ]
@@ -299,13 +290,13 @@ if __name__ == '__main__':
 
         f.subplots_adjust(hspace = 0.0)
         f.subplots_adjust(wspace = 0.05)
-
+        plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
         plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
         plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
         for i in range(nCols):
             axArr[0, i].set_title(colNames[i])
 
-        plt.suptitle(r'Correlations - Flux')
-        f.savefig('%s-corre_flux.png' % P.K.califaID)
+        plt.suptitle(r'Correlations - Flux - %i masked zones')
+        f.savefig('%s-corre-%s_flux.png' % (args.outputfname, P.K.califaID))
         plt.close()

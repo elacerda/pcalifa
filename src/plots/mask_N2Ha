@@ -1,0 +1,6 @@
+2
+0000.0  3800.0  0.0  red!           exclude blue
+6528.0	6608.0	0.0  Halpha & [NII] 6563, 6548 & 6583 emission lines
+#
+# Main EmLines plus extra weight in CaK & G-band and plus excluding blue end!
+# ElCid@Sanchica - 02/May/2012

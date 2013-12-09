@@ -1,0 +1,7 @@
+3
+0000.0  3800.0  0.0  red!           exclude blue
+4838.0	4884.0	0.0  Hbeta          4861 emission line 
+4930.0	5038.0	0.0  [OIII]         4959 & 5007 emission lines
+#
+# Main EmLines plus extra weight in CaK & G-band and plus excluding blue end!
+# ElCid@Sanchica - 02/May/2012
