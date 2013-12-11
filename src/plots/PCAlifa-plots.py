@@ -10,10 +10,12 @@ import numpy as np
 import PCAlifa as PCA
 import argparse as ap
 from matplotlib import pyplot as plt
+from matplotlib import cm
+from scipy import stats as st
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 
-plt.rcParams.update({'font.family' : 'Times New Roman',
+plt.rcParams.update({'font.family' : 'serif',
                      'text.usetex' : False,
                      'backend' : 'ps'
                      })
@@ -65,11 +67,15 @@ def parser_args():
                         action = 'store_true',
                         default = False)
     parser.add_argument('--tomograms', '-T',
-                        help = 'Plots tomograms.',
+                        help = 'Plot tomograms.',
                         action = 'store_true',
                         default = False)
     parser.add_argument('--correlat', '-C',
-                        help = 'Plots correlations.',
+                        help = 'Plot correlations.',
+                        action = 'store_true',
+                        default = False)
+    parser.add_argument('--pcalog',
+                        help = 'PCA from logfluxes',
                         action = 'store_true',
                         default = False)
     parser.add_argument('--numcorrepc',
@@ -167,8 +173,8 @@ if __name__ == '__main__':
     P.sanityCheck(P.l_obs, P.f_res_norm__zl[0, :], npref_f_res_norm)
     ######################
 
-#########################################################################
-############################## Tomograms ################################
+    #########################################################################
+    ############################## Tomograms ################################
 
     if args.tomograms:
         P.screeTestPlot(P.eigVal_obs__k, args.tmax, npref_f_obs, '%s FOBS' % P.K.califaID)
@@ -186,12 +192,11 @@ if __name__ == '__main__':
             P.tomoPlot(P.tomo_res__kyx, P.l_obs, P.eigVec_res__lk, P.eigVal_res__k, P.ms_res__l, ti, npref_f_res)
             P.tomoPlot(P.tomo_res_norm__kyx, P.l_obs, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, P.ms_res_norm__l, ti, npref_f_res_norm)
 
-#########################################################################
-#########################################################################
+    #########################################################################
+    #########################################################################
 
-
-#########################################################################
-########################### Rebuild Spectra #############################
+    #########################################################################
+    ########################### Rebuild Spectra #############################
     if args.rebuildSpec:
         if (P.K.N_zone > args.zonesArr[-2]):
             for nZone in args.zonesArr:
@@ -209,12 +214,11 @@ if __name__ == '__main__':
                                 P.f_res_norm__zl, P.tomo_res_norm__zk, P.eigVec_res_norm__lk, P.eigVal_res_norm__k, P.ms_res_norm__l, npref_f_res_norm, True)
         else:
             print "%s N_Zone < %d" % (P.K.califaID, args.zonesArr[-2])
-#########################################################################
-#########################################################################
+    #########################################################################
+    #########################################################################
 
-
-#########################################################################
-############################ Correlations ###############################
+    #########################################################################
+    ############################ Correlations ###############################
     if args.correlat:
         colArr = [
                 P.K.at_flux__z,
@@ -236,8 +240,7 @@ if __name__ == '__main__':
         nRows = args.numcorrepc
         nCols = len(colArr) + 1
 
-    ############################### OBS NORM ###############################     
-
+        ############################### OBS NORM ###############################
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
 
@@ -253,6 +256,7 @@ if __name__ == '__main__':
         f.subplots_adjust(hspace = 0.0)
         f.subplots_adjust(wspace = 0.05)
 
+        plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
         plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
         plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
@@ -263,7 +267,7 @@ if __name__ == '__main__':
         f.savefig('%s-corre_obs_norm.png' % P.K.califaID)
         plt.close()
 
-    ############################### SYN NORM ###############################     
+        ############################### SYN NORM ###############################
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
 
@@ -279,6 +283,7 @@ if __name__ == '__main__':
         f.subplots_adjust(hspace = 0.0)
         f.subplots_adjust(wspace = 0.05)
 
+        plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
         plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
         plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
@@ -289,7 +294,7 @@ if __name__ == '__main__':
         f.savefig('%s-corre_syn_norm.png' % P.K.califaID)
         plt.close()
 
-    ############################### RES NORM ###############################     
+        ############################### RES NORM ###############################
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
 
@@ -305,6 +310,7 @@ if __name__ == '__main__':
         f.subplots_adjust(hspace = 0.0)
         f.subplots_adjust(wspace = 0.05)
 
+        plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
         plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
         plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
@@ -315,14 +321,227 @@ if __name__ == '__main__':
         f.savefig('%s-corre_res_norm.png' % P.K.califaID)
         plt.close()
 
-    #########################################################################
-    #########################################################################
+        #########################################################################
+        #########################################################################
+
+        #########################################################################
+        ######################### PC-PC Correlations ############################
+
+        prop = {
+            'arr'   : [ P.K.at_flux__z, np.log10(P.K.aZ_flux__z / 0.019), P.K.A_V, P.K.v_0, P.K.v_d ],
+            'label' : [ r'$\log\ t\ [yr]$', r'$\log\ Z\ [Z_\odot]$', r'$A_V\ [mag]$', r'$v_\star\ [km/s]$', r'$\sigma_\star\ [km/s]$' ],
+            'fname' : [ 'at_flux', 'aZ_flux', 'AV', 'v0', 'vd' ]
+        }
+
+        ############################### OBS NORM ###############################
+        for p_i, p in enumerate(prop['arr']):
+            nRows = args.numcorrepc
+            nCols = args.numcorrepc
+            f, axArr = plt.subplots(nRows, nCols)
+
+            fig_width_pt = 1080.
+            inches_per_pt = 1.0 / 72.27
+            golden_mean = (5 ** 0.5 - 1.0) / 2.0
+            fig_width = fig_width_pt * inches_per_pt
+            fig_height = fig_width * golden_mean
+
+            f.set_size_inches(fig_width, fig_height)
+            f.set_dpi(200)
+
+            for i in range(nRows):
+                axArr[i, 0].set_ylabel('PC%d' % i)
+
+                for j in range(nCols):
+                    ax = axArr[i, j]
+                    x = P.tomo_obs_norm__zk[:, i]
+                    y = P.tomo_obs_norm__zk[:, j]
+                    z = p
+
+                    rhoPearson, pvalPearson = st.pearsonr(x, y)
+                    rhoSpearman, pvalSpearman = st.spearmanr(x, y)
+                    pTxt = 'p: %.2f' % rhoPearson
+                    spTxt = 's: %.2f' % rhoSpearman
+
+                    if (prop['fname'])[p_i] == 'vd' :
+                        im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral, vmax = 250)
+                    else:
+                        im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral)
+
+                    ax.text(0.95, 0.88, pTxt,
+                            fontsize = 10, transform = ax.transAxes,
+                            horizontalalignment = 'right',
+                            verticalalignment = 'center',
+                            multialignment = 'right',
+                            weight = 'bold')
+                    ax.text(0.95, 0.72, spTxt,
+                            color = 'red',
+                            fontsize = 10, transform = ax.transAxes,
+                            horizontalalignment = 'right',
+                            verticalalignment = 'center',
+                            multialignment = 'right',
+                            weight = 'bold')
+                    plt.setp(ax.get_yticklabels(), visible = False)
+
+            f.subplots_adjust(hspace = 0.0)
+            f.subplots_adjust(wspace = 0.0)
+            f.subplots_adjust(right = 0.8)
+            cbar_ax = f.add_axes([0.85, 0.15, 0.05, 0.7])
+            cb = f.colorbar(im, cax = cbar_ax)
+            cb.set_label(prop['label'][p_i])
+
+            plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
+            plt.setp([a.get_xticklabels() for a in f.axes[:-(nCols + 1)]], visible = False)
+            plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
+
+            for i in range(nCols):
+                axArr[0, i].set_title('PC%d' % i)
+
+            plt.suptitle(r'Correlations - OBS NORM')
+            f.savefig('%s-corre_obs_norm_PCxPC_%s.png' % (P.K.califaID, prop['fname'][p_i]))
+            plt.close()
+
+        ############################### SYN NORM ###############################
+        for p_i, p in enumerate(prop['arr']):
+            nRows = args.numcorrepc
+            nCols = args.numcorrepc
+            f, axArr = plt.subplots(nRows, nCols)
+
+            fig_width_pt = 1080.
+            inches_per_pt = 1.0 / 72.27
+            golden_mean = (5 ** 0.5 - 1.0) / 2.0
+            fig_width = fig_width_pt * inches_per_pt
+            fig_height = fig_width * golden_mean
+
+            f.set_size_inches(fig_width, fig_height)
+            f.set_dpi(200)
+
+            for i in range(nRows):
+                axArr[i, 0].set_ylabel('PC%d' % i)
+
+                for j in range(nCols):
+                    ax = axArr[i, j]
+                    x = P.tomo_syn_norm__zk[:, i]
+                    y = P.tomo_syn_norm__zk[:, j]
+                    z = p
+
+                    rhoPearson, pvalPearson = st.pearsonr(x, y)
+                    rhoSpearman, pvalSpearman = st.spearmanr(x, y)
+                    pTxt = 'p: %.2f' % rhoPearson
+                    spTxt = 's: %.2f' % rhoSpearman
+
+                    if (prop['fname'])[p_i] == 'vd' :
+                        im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral, vmax = 250)
+                    else:
+                        im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral)
+
+                    ax.text(0.95, 0.88, pTxt,
+                            fontsize = 10, transform = ax.transAxes,
+                            horizontalalignment = 'right',
+                            verticalalignment = 'center',
+                            multialignment = 'right',
+                            weight = 'bold')
+                    ax.text(0.95, 0.72, spTxt,
+                            color = 'red',
+                            fontsize = 10, transform = ax.transAxes,
+                            horizontalalignment = 'right',
+                            verticalalignment = 'center',
+                            multialignment = 'right',
+                            weight = 'bold')
+                    plt.setp(ax.get_yticklabels(), visible = False)
+
+            f.subplots_adjust(hspace = 0.0)
+            f.subplots_adjust(wspace = 0.0)
+            f.subplots_adjust(right = 0.8)
+            cbar_ax = f.add_axes([0.85, 0.15, 0.05, 0.7])
+            cb = f.colorbar(im, cax = cbar_ax)
+            cb.set_label(prop['label'][p_i])
+
+            plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
+            plt.setp([a.get_xticklabels() for a in f.axes[:-(nCols + 1)]], visible = False)
+            plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
+
+            for i in range(nCols):
+                axArr[0, i].set_title('PC%d' % i)
+
+            plt.suptitle(r'Correlations - OBS NORM')
+            f.savefig('%s-corre_syn_norm_PCxPC_%s.png' % (P.K.califaID, prop['fname'][p_i]))
+            plt.close()
+
+        ############################### RES NORM ###############################
+        for p_i, p in enumerate(prop['arr']):
+            nRows = args.numcorrepc
+            nCols = args.numcorrepc
+            f, axArr = plt.subplots(nRows, nCols)
+
+            fig_width_pt = 1080.
+            inches_per_pt = 1.0 / 72.27
+            golden_mean = (5 ** 0.5 - 1.0) / 2.0
+            fig_width = fig_width_pt * inches_per_pt
+            fig_height = fig_width * golden_mean
+
+            f.set_size_inches(fig_width, fig_height)
+            f.set_dpi(200)
+
+            for i in range(nRows):
+                axArr[i, 0].set_ylabel('PC%d' % i)
+
+                for j in range(nCols):
+                    ax = axArr[i, j]
+                    x = P.tomo_res_norm__zk[:, i]
+                    y = P.tomo_res_norm__zk[:, j]
+                    z = p
+
+                    rhoPearson, pvalPearson = st.pearsonr(x, y)
+                    rhoSpearman, pvalSpearman = st.spearmanr(x, y)
+                    pTxt = 'p: %.2f' % rhoPearson
+                    spTxt = 's: %.2f' % rhoSpearman
+
+                    if (prop['fname'])[p_i] == 'vd' :
+                        im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral, vmax = 250)
+                    else:
+                        im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral)
+
+                    ax.text(0.95, 0.88, pTxt,
+                            fontsize = 10, transform = ax.transAxes,
+                            horizontalalignment = 'right',
+                            verticalalignment = 'center',
+                            multialignment = 'right',
+                            weight = 'bold')
+                    ax.text(0.95, 0.72, spTxt,
+                            color = 'red',
+                            fontsize = 10, transform = ax.transAxes,
+                            horizontalalignment = 'right',
+                            verticalalignment = 'center',
+                            multialignment = 'right',
+                            weight = 'bold')
+                    plt.setp(ax.get_yticklabels(), visible = False)
+
+            f.subplots_adjust(hspace = 0.0)
+            f.subplots_adjust(wspace = 0.0)
+            f.subplots_adjust(right = 0.8)
+            cbar_ax = f.add_axes([0.85, 0.15, 0.05, 0.7])
+            cb = f.colorbar(im, cax = cbar_ax)
+            cb.set_label(prop['label'][p_i])
 
 
-    #########################################################################
-    ###################### Population Correlations ##########################
+            plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
+            plt.setp([a.get_xticklabels() for a in f.axes[:-(nCols + 1)]], visible = False)
+            plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
-    ############################### OBS NORM ###############################
+            for i in range(nCols):
+                axArr[0, i].set_title('PC%d' % i)
+
+            plt.suptitle(r'Correlations - OBS NORM')
+            f.savefig('%s-corre_res_norm_PCxPC_%s.png' % (P.K.califaID, prop['fname'][p_i]))
+            plt.close()
+
+        #########################################################################
+        #########################################################################
+
+        #########################################################################
+        ###################### Population Correlations ##########################
+
+        ############################### OBS NORM ###############################
         arrInd_1 = range(0, 5)
         arrInd_2 = range(5, 17)
         arrInd_3 = range(17, 27)
@@ -369,6 +588,7 @@ if __name__ == '__main__':
         f.subplots_adjust(hspace = 0.0)
         f.subplots_adjust(wspace = 0.05)
 
+        plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
         plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
         plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
@@ -379,7 +599,7 @@ if __name__ == '__main__':
         f.savefig('%s-corre_obs_norm_popx.png' % P.K.califaID)
         plt.close()
 
-    ############################### SYN NORM ###############################
+        ############################### SYN NORM ###############################
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
 
@@ -395,6 +615,7 @@ if __name__ == '__main__':
         f.subplots_adjust(hspace = 0.0)
         f.subplots_adjust(wspace = 0.05)
 
+        plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
         plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
         plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
@@ -405,7 +626,7 @@ if __name__ == '__main__':
         f.savefig('%s-corre_syn_norm_popx.png' % P.K.califaID)
         plt.close()
 
-    ############################### RES NORM ###############################
+        ############################### RES NORM ###############################
         f, axArr = plt.subplots(nRows, nCols)
         f.set_size_inches(19.2, 10.8)
 
@@ -421,6 +642,7 @@ if __name__ == '__main__':
         f.subplots_adjust(hspace = 0.0)
         f.subplots_adjust(wspace = 0.05)
 
+        plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
         plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
         plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
@@ -431,207 +653,351 @@ if __name__ == '__main__':
         f.savefig('%s-corre_res_norm_popx.png' % P.K.califaID)
         plt.close()
 
-#########################################################################
-#########################################################################
-
-
-#########################################################################
-############################## PCA LOG ##################################
-    npref_f_obs = '%s-logf_obs_' % P.K.califaID
-    npref_f_obs_norm = '%s-logf_obs_norm_' % P.K.califaID
-    npref_f_syn = '%s-logf_syn_' % P.K.califaID
-    npref_f_syn_norm = '%s-logf_syn_norm_' % P.K.califaID
-
-    if args.outputfname:
-        npref_f_obs = '%s%s_' % (npref_f_obs, args.outputfname)
-        npref_f_obs_norm = '%s%s_' % (npref_f_obs_norm, args.outputfname)
-        npref_f_syn = '%s%s_' % (npref_f_syn, args.outputfname)
-        npref_f_syn_norm = '%s%s_' % (npref_f_syn_norm, args.outputfname)
-
-    I_obs__zl, ms_obs__l, covMat_obs__ll, eigVal_obs__k, eigVec_obs__lk = P.PCA(np.log10(np.abs(P.f_obs__zl)), P.K.N_zone, 0)
-    I_obs_norm__zl, ms_obs_norm__l, covMat_obs_norm__ll, eigVal_obs_norm__k, eigVec_obs_norm__lk = P.PCA(np.log10(np.abs(P.f_obs_norm__zl)), P.K.N_zone, 0)
-    I_syn__zl, ms_syn__l, covMat_syn__ll, eigVal_syn__k, eigVec_syn__lk = P.PCA(np.log10(np.abs(P.f_syn__zl)), P.K.N_zone, 0)
-    I_syn_norm__zl, ms_syn_norm__l, covMat_syn_norm__ll, eigVal_syn_norm__k, eigVec_syn_norm__lk = P.PCA(np.log10(np.abs(P.f_syn_norm__zl)), P.K.N_zone, 0)
-
-    tomo_obs__zk, tomo_obs__kyx = P.tomogram(I_obs__zl, eigVec_obs__lk)
-    tomo_obs_norm__zk, tomo_obs_norm__kyx = P.tomogram(I_obs_norm__zl, eigVec_obs_norm__lk)
-    tomo_syn__zk, tomo_syn__kyx = P.tomogram(I_syn__zl, eigVec_syn__lk)
-    tomo_syn_norm__zk, tomo_syn_norm__kyx = P.tomogram(I_syn_norm__zl, eigVec_syn_norm__lk)
-
-    if args.tomograms:
-        P.screeTestPlot(eigVal_obs__k, args.tmax, npref_f_obs, '%s LOG FOBS' % P.K.califaID)
-        P.screeTestPlot(eigVal_obs_norm__k, args.tmax, npref_f_obs_norm, '%s LOG FOBS NORM' % P.K.califaID)
-        P.screeTestPlot(eigVal_syn__k, args.tmax, npref_f_syn, '%s LOG FSYN' % P.K.califaID)
-        P.screeTestPlot(eigVal_syn_norm__k, args.tmax, npref_f_syn_norm, '%s LOG FSYN NORM' % P.K.califaID)
-
-        for ti in range(args.tmax):
-            P.tomoPlot(tomo_obs__kyx, P.l_obs, eigVec_obs__lk, eigVal_obs__k, ms_obs__l, ti, npref_f_obs)
-            P.tomoPlot(tomo_obs_norm__kyx, P.l_obs, eigVec_obs_norm__lk, eigVal_obs_norm__k, ms_obs_norm__l, ti, npref_f_obs_norm)
-            P.tomoPlot(tomo_syn__kyx, P.l_syn, eigVec_syn__lk, eigVal_syn__k, ms_syn__l, ti, npref_f_syn)
-            P.tomoPlot(tomo_syn_norm__kyx, P.l_syn, eigVec_syn_norm__lk, eigVal_syn_norm__k, ms_syn_norm__l, ti, npref_f_syn_norm)
-
-
-#########################################################################
-############################ Correlations ###############################
-
-    if args.correlat:
-        colArr = [
-                P.K.at_flux__z,
-                np.log10(P.K.aZ_flux__z / 0.019),
-                P.K.A_V,
-                P.K.v_0,
-                P.K.v_d,
-        ]
-
-        colNames = [
-            r'$\log\ t[yr]$',
-            r'$\log\ Z\ [Z_\odot]$',
-            r'$A_V\ [mag]$',
-            r'$v_\star\ [km/s]$',
-            r'$\sigma_\star\ [km/s]$',
-            r'eigenvector',
-        ]
-    ############################### OBS NORM ###############################     
-
-        nRows = args.numcorrepc
-        nCols = len(colArr) + 1
-        f, axArr = plt.subplots(nRows, nCols)
-        f.set_size_inches(19.2, 10.8)
-
-        for i in range(nRows):
-            axArr[i, 0].set_ylabel('PC%d' % i)
-
-            for j in range(nCols)[:-1]:
-                P.correlationAxisPlot(colArr[j], tomo_obs_norm__zk[:, i], axArr[i, j])
-
-            axArr[i, nCols - 1].plot(P.l_obs, eigVec_obs_norm__lk[:, i])
-            plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
-
-        f.subplots_adjust(hspace = 0.0)
-        f.subplots_adjust(wspace = 0.05)
-
-        plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
-        plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-
-        for i in range(nCols):
-            axArr[0, i].set_title(colNames[i])
-
-        plt.suptitle(r'Correlations - OBS NORM')
-        f.savefig('%s-corre_logf_obs_norm.png' % P.K.califaID)
-        plt.close()
-
-    ############################### SYN NORM ###############################     
-        f, axArr = plt.subplots(nRows, nCols)
-        f.set_size_inches(19.2, 10.8)
-
-        for i in range(nRows):
-            axArr[i, 0].set_ylabel('PC%d' % i)
-
-            for j in range(nCols)[:-1]:
-                P.correlationAxisPlot(colArr[j], tomo_syn_norm__zk[:, i], axArr[i, j])
-
-            axArr[i, nCols - 1].plot(P.l_syn, eigVec_syn_norm__lk[:, i])
-            plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
-
-        f.subplots_adjust(hspace = 0.0)
-        f.subplots_adjust(wspace = 0.05)
-
-        plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
-        plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-
-        for i in range(nCols):
-            axArr[0, i].set_title(colNames[i])
-
-        plt.suptitle(r'Correlations - SYN NORM')
-        f.savefig('%s-corre_logf_syn_norm.png' % P.K.califaID)
-        plt.close()
-
     #########################################################################
     #########################################################################
 
-
     #########################################################################
-    ###################### Population Correlations ##########################
+    ############################### PCA LOG #################################
+    if args.pcalog:
+        npref_f_obs = '%s-logf_obs_' % P.K.califaID
+        npref_f_obs_norm = '%s-logf_obs_norm_' % P.K.califaID
+        npref_f_syn = '%s-logf_syn_' % P.K.califaID
+        npref_f_syn_norm = '%s-logf_syn_norm_' % P.K.califaID
 
-    ############################### OBS NORM ###############################
-        arrInd_1 = range(0, 5)
-        arrInd_2 = range(5, 17)
-        arrInd_3 = range(17, 27)
-        arrInd_4 = range(27, 36)
-        arrInd_5 = range(36, len(P.K.ageBase))
+        if args.outputfname:
+            npref_f_obs = '%s%s_' % (npref_f_obs, args.outputfname)
+            npref_f_obs_norm = '%s%s_' % (npref_f_obs_norm, args.outputfname)
+            npref_f_syn = '%s%s_' % (npref_f_syn, args.outputfname)
+            npref_f_syn_norm = '%s%s_' % (npref_f_syn_norm, args.outputfname)
 
-        logt = np.log10(P.K.ageBase)
-        maskpopx1 = (logt < 7.5)
-        maskpopx2 = (logt < 8.5) & (logt >= 7.5)
-        maskpopx3 = (logt < 9.5) & (logt >= 8.5)
-        maskpopx4 = (logt >= 9.5)
+        I_obs__zl, ms_obs__l, covMat_obs__ll, eigVal_obs__k, eigVec_obs__lk = P.PCA(np.log10(np.abs(P.f_obs__zl)), P.K.N_zone, 0)
+        I_obs_norm__zl, ms_obs_norm__l, covMat_obs_norm__ll, eigVal_obs_norm__k, eigVec_obs_norm__lk = P.PCA(np.log10(np.abs(P.f_obs_norm__zl)), P.K.N_zone, 0)
+        I_syn__zl, ms_syn__l, covMat_syn__ll, eigVal_syn__k, eigVec_syn__lk = P.PCA(np.log10(np.abs(P.f_syn__zl)), P.K.N_zone, 0)
+        I_syn_norm__zl, ms_syn_norm__l, covMat_syn_norm__ll, eigVal_syn_norm__k, eigVec_syn_norm__lk = P.PCA(np.log10(np.abs(P.f_syn_norm__zl)), P.K.N_zone, 0)
 
-        popxtot = P.K.popx.sum(axis = 1).sum(axis = 0)
+        tomo_obs__zk, tomo_obs__kyx = P.tomogram(I_obs__zl, eigVec_obs__lk)
+        tomo_obs_norm__zk, tomo_obs_norm__kyx = P.tomogram(I_obs_norm__zl, eigVec_obs_norm__lk)
+        tomo_syn__zk, tomo_syn__kyx = P.tomogram(I_syn__zl, eigVec_syn__lk)
+        tomo_syn_norm__zk, tomo_syn_norm__kyx = P.tomogram(I_syn_norm__zl, eigVec_syn_norm__lk)
 
-        colArr = []
+        if args.tomograms:
+            P.screeTestPlot(eigVal_obs__k, args.tmax, npref_f_obs, '%s LOG FOBS' % P.K.califaID)
+            P.screeTestPlot(eigVal_obs_norm__k, args.tmax, npref_f_obs_norm, '%s LOG FOBS NORM' % P.K.califaID)
+            P.screeTestPlot(eigVal_syn__k, args.tmax, npref_f_syn, '%s LOG FSYN' % P.K.califaID)
+            P.screeTestPlot(eigVal_syn_norm__k, args.tmax, npref_f_syn_norm, '%s LOG FSYN NORM' % P.K.califaID)
 
-        colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx1, :], logt[maskpopx1], (0, 0)) / popxtot)
-        colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx2, :], logt[maskpopx2], (0, 0)) / popxtot)
-        colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx3, :], logt[maskpopx3], (0, 0)) / popxtot)
-        colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx4, :], logt[maskpopx4], (0, 0)) / popxtot)
+            for ti in range(args.tmax):
+                P.tomoPlot(tomo_obs__kyx, P.l_obs, eigVec_obs__lk, eigVal_obs__k, ms_obs__l, ti, npref_f_obs)
+                P.tomoPlot(tomo_obs_norm__kyx, P.l_obs, eigVec_obs_norm__lk, eigVal_obs_norm__k, ms_obs_norm__l, ti, npref_f_obs_norm)
+                P.tomoPlot(tomo_syn__kyx, P.l_syn, eigVec_syn__lk, eigVal_syn__k, ms_syn__l, ti, npref_f_syn)
+                P.tomoPlot(tomo_syn_norm__kyx, P.l_syn, eigVec_syn_norm__lk, eigVal_syn_norm__k, ms_syn_norm__l, ti, npref_f_syn_norm)
 
-        colNames = [
-            r'$10^6\ to\ 10^{7.5}yr$',
-            r'$10^{7.5}\ to\ 10^{8.5}yr$',
-            r'$10^{8.5}\ to\ 10^{9.5}yr$',
-            r'$10^{9.5}\ to\ 10^{10.2}yr$',
-            r'eigenvector',
-        ]
+        #########################################################################
+        ############################# Correlations ##############################
+        if args.correlat:
+            colArr = [
+                    P.K.at_flux__z,
+                    np.log10(P.K.aZ_flux__z / 0.019),
+                    P.K.A_V,
+                    P.K.v_0,
+                    P.K.v_d,
+            ]
 
-        nRows = args.numcorrepc
-        nCols = len(colArr) + 1
-        f, axArr = plt.subplots(nRows, nCols)
-        f.set_size_inches(19.2, 10.8)
+            colNames = [
+                r'$\log\ t[yr]$',
+                r'$\log\ Z\ [Z_\odot]$',
+                r'$A_V\ [mag]$',
+                r'$v_\star\ [km/s]$',
+                r'$\sigma_\star\ [km/s]$',
+                r'eigenvector',
+            ]
 
-        for i in range(nRows):
-            axArr[i, 0].set_ylabel('PC%d' % i)
+            ############################### OBS NORM ###############################
+            nRows = args.numcorrepc
+            nCols = len(colArr) + 1
+            f, axArr = plt.subplots(nRows, nCols)
+            f.set_size_inches(19.2, 10.8)
 
-            for j in range(nCols)[:-1]:
-                P.correlationAxisPlot(colArr[j], tomo_obs_norm__zk[:, i], axArr[i, j])
+            for i in range(nRows):
+                axArr[i, 0].set_ylabel('PC%d' % i)
 
-            axArr[i, nCols - 1].plot(P.l_obs, eigVec_obs_norm__lk[:, i])
-            plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
+                for j in range(nCols)[:-1]:
+                    P.correlationAxisPlot(colArr[j], tomo_obs_norm__zk[:, i], axArr[i, j])
 
-        f.subplots_adjust(hspace = 0.0)
-        f.subplots_adjust(wspace = 0.05)
+                axArr[i, nCols - 1].plot(P.l_obs, eigVec_obs_norm__lk[:, i])
+                plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
-        plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
-        plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
+            f.subplots_adjust(hspace = 0.0)
+            f.subplots_adjust(wspace = 0.05)
 
-        for i in range(nCols):
-            axArr[0, i].set_title(colNames[i])
+            plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
+            plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
+            plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
-        plt.suptitle(r'Correlations - OBS NORM')
-        f.savefig('%s-corre_logf_obs_norm_popx.png' % P.K.califaID)
-        plt.close()
+            for i in range(nCols):
+                axArr[0, i].set_title(colNames[i])
 
-    ############################### SYN NORM ###############################
-        f, axArr = plt.subplots(nRows, nCols)
-        f.set_size_inches(19.2, 10.8)
+            plt.suptitle(r'Correlations - OBS NORM')
+            f.savefig('%s-corre_logf_obs_norm.png' % P.K.califaID)
+            plt.close()
 
-        for i in range(nRows):
-            axArr[i, 0].set_ylabel('PC%d' % i)
+            ############################### SYN NORM ###############################
+            f, axArr = plt.subplots(nRows, nCols)
+            f.set_size_inches(19.2, 10.8)
 
-            for j in range(nCols)[:-1]:
-                P.correlationAxisPlot(colArr[j], tomo_syn_norm__zk[:, i], axArr[i, j])
+            for i in range(nRows):
+                axArr[i, 0].set_ylabel('PC%d' % i)
 
-            axArr[i, nCols - 1].plot(P.l_syn, eigVec_syn_norm__lk[:, i])
-            plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
+                for j in range(nCols)[:-1]:
+                    P.correlationAxisPlot(colArr[j], tomo_syn_norm__zk[:, i], axArr[i, j])
 
-        f.subplots_adjust(hspace = 0.0)
-        f.subplots_adjust(wspace = 0.05)
+                axArr[i, nCols - 1].plot(P.l_syn, eigVec_syn_norm__lk[:, i])
+                plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
 
-        plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
-        plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
+            f.subplots_adjust(hspace = 0.0)
+            f.subplots_adjust(wspace = 0.05)
 
-        for i in range(nCols):
-            axArr[0, i].set_title(colNames[i])
+            plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
+            plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
+            plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
 
-        plt.suptitle(r'Correlations - SYN NORM')
-        f.savefig('%s-corre_logf_syn_norm_popx.png' % P.K.califaID)
-        plt.close()
+            for i in range(nCols):
+                axArr[0, i].set_title(colNames[i])
+
+            plt.suptitle(r'Correlations - SYN NORM')
+            f.savefig('%s-corre_logf_syn_norm.png' % P.K.califaID)
+            plt.close()
+
+            #########################################################################
+            ######################### PC-PC Correlations ############################
+
+            prop = {
+                'arr'   : [ P.K.at_flux__z, np.log10(P.K.aZ_flux__z / 0.019), P.K.A_V, P.K.v_0, P.K.v_d ],
+                'label' : [ r'$\log\ t\ [yr]$', r'$\log\ Z\ [Z_\odot]$', r'$A_V\ [mag]$', r'$v_\star\ [km/s]$', r'$\sigma_\star\ [km/s]$' ],
+                'fname' : [ 'at_flux', 'aZ_flux', 'AV', 'v0', 'vd' ]
+            }
+
+            ############################### OBS NORM ###############################
+            for p_i, p in enumerate(prop['arr']):
+                nRows = args.numcorrepc
+                nCols = args.numcorrepc
+                f, axArr = plt.subplots(nRows, nCols)
+
+                fig_width_pt = 1080.
+                inches_per_pt = 1.0 / 72.27
+                golden_mean = (5 ** 0.5 - 1.0) / 2.0
+                fig_width = fig_width_pt * inches_per_pt
+                fig_height = fig_width * golden_mean
+
+                f.set_size_inches(fig_width, fig_height)
+                f.set_dpi(200)
+
+                for i in range(nRows):
+                    axArr[i, 0].set_ylabel('PC%d' % i)
+
+                    for j in range(nCols):
+                        ax = axArr[i, j]
+                        x = tomo_obs_norm__zk[:, i]
+                        y = tomo_obs_norm__zk[:, j]
+                        z = p
+
+                        rhoPearson, pvalPearson = st.pearsonr(x, y)
+                        rhoSpearman, pvalSpearman = st.spearmanr(x, y)
+                        pTxt = 'p: %.2f' % rhoPearson
+                        spTxt = 's: %.2f' % rhoSpearman
+
+                        if (prop['fname'])[p_i] == 'vd' :
+                            im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral, vmax = 250)
+                        else:
+                            im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral)
+
+                        ax.text(0.95, 0.88, pTxt,
+                                fontsize = 10, transform = ax.transAxes,
+                                horizontalalignment = 'right',
+                                verticalalignment = 'center',
+                                multialignment = 'right',
+                                weight = 'bold')
+                        ax.text(0.95, 0.72, spTxt,
+                                color = 'red',
+                                fontsize = 10, transform = ax.transAxes,
+                                horizontalalignment = 'right',
+                                verticalalignment = 'center',
+                                multialignment = 'right',
+                                weight = 'bold')
+                        plt.setp(ax.get_yticklabels(), visible = False)
+
+                f.subplots_adjust(hspace = 0.0)
+                f.subplots_adjust(wspace = 0.0)
+                f.subplots_adjust(right = 0.8)
+                cbar_ax = f.add_axes([0.85, 0.15, 0.05, 0.7])
+                cb = f.colorbar(im, cax = cbar_ax)
+                cb.set_label(prop['label'][p_i])
+
+                plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
+                plt.setp([a.get_xticklabels() for a in f.axes[:-(nCols + 1)]], visible = False)
+                plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
+
+                for i in range(nCols):
+                    axArr[0, i].set_title('PC%d' % i)
+
+                plt.suptitle(r'Correlations - LOGFlux - OBS NORM')
+                f.savefig('%s-corre_logf_obs_norm_PCxPC_%s.png' % (P.K.califaID, prop['fname'][p_i]))
+                plt.close()
+
+            ############################### SYN NORM ###############################
+            for p_i, p in enumerate(prop['arr']):
+                nRows = args.numcorrepc
+                nCols = args.numcorrepc
+                f, axArr = plt.subplots(nRows, nCols)
+
+                fig_width_pt = 1080.
+                inches_per_pt = 1.0 / 72.27
+                golden_mean = (5 ** 0.5 - 1.0) / 2.0
+                fig_width = fig_width_pt * inches_per_pt
+                fig_height = fig_width * golden_mean
+
+                f.set_size_inches(fig_width, fig_height)
+                f.set_dpi(200)
+
+                for i in range(nRows):
+                    axArr[i, 0].set_ylabel('PC%d' % i)
+
+                    for j in range(nCols):
+                        ax = axArr[i, j]
+                        x = tomo_syn_norm__zk[:, i]
+                        y = tomo_syn_norm__zk[:, j]
+                        z = p
+
+                        rhoPearson, pvalPearson = st.pearsonr(x, y)
+                        rhoSpearman, pvalSpearman = st.spearmanr(x, y)
+                        pTxt = 'p: %.2f' % rhoPearson
+                        spTxt = 's: %.2f' % rhoSpearman
+
+                        if (prop['fname'])[p_i] == 'vd' :
+                            im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral, vmax = 250)
+                        else:
+                            im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral)
+
+                        ax.text(0.95, 0.88, pTxt,
+                                fontsize = 10, transform = ax.transAxes,
+                                horizontalalignment = 'right',
+                                verticalalignment = 'center',
+                                multialignment = 'right',
+                                weight = 'bold')
+                        ax.text(0.95, 0.72, spTxt,
+                                color = 'red',
+                                fontsize = 10, transform = ax.transAxes,
+                                horizontalalignment = 'right',
+                                verticalalignment = 'center',
+                                multialignment = 'right',
+                                weight = 'bold')
+                        plt.setp(ax.get_yticklabels(), visible = False)
+
+                f.subplots_adjust(hspace = 0.0)
+                f.subplots_adjust(wspace = 0.0)
+                f.subplots_adjust(right = 0.8)
+                cbar_ax = f.add_axes([0.85, 0.15, 0.05, 0.7])
+                cb = f.colorbar(im, cax = cbar_ax)
+                cb.set_label(prop['label'][p_i])
+
+                plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
+                plt.setp([a.get_xticklabels() for a in f.axes[:-(nCols + 1)]], visible = False)
+                plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
+
+                for i in range(nCols):
+                    axArr[0, i].set_title('PC%d' % i)
+
+                plt.suptitle(r'Correlations - LOGFlux - OBS NORM')
+                f.savefig('%s-corre_logf_syn_norm_PCxPC_%s.png' % (P.K.califaID, prop['fname'][p_i]))
+                plt.close()
+
+            #########################################################################
+            #########################################################################
+
+            ########################################################################
+            ######################## Population Correlations #######################
+
+            ############################### OBS NORM ###############################
+            arrInd_1 = range(0, 5)
+            arrInd_2 = range(5, 17)
+            arrInd_3 = range(17, 27)
+            arrInd_4 = range(27, 36)
+            arrInd_5 = range(36, len(P.K.ageBase))
+
+            logt = np.log10(P.K.ageBase)
+            maskpopx1 = (logt < 7.5)
+            maskpopx2 = (logt < 8.5) & (logt >= 7.5)
+            maskpopx3 = (logt < 9.5) & (logt >= 8.5)
+            maskpopx4 = (logt >= 9.5)
+
+            popxtot = P.K.popx.sum(axis = 1).sum(axis = 0)
+
+            colArr = []
+
+            colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx1, :], logt[maskpopx1], (0, 0)) / popxtot)
+            colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx2, :], logt[maskpopx2], (0, 0)) / popxtot)
+            colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx3, :], logt[maskpopx3], (0, 0)) / popxtot)
+            colArr.append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx4, :], logt[maskpopx4], (0, 0)) / popxtot)
+
+            colNames = [
+                r'$10^6\ to\ 10^{7.5}yr$',
+                r'$10^{7.5}\ to\ 10^{8.5}yr$',
+                r'$10^{8.5}\ to\ 10^{9.5}yr$',
+                r'$10^{9.5}\ to\ 10^{10.2}yr$',
+                r'eigenvector',
+            ]
+
+            nRows = args.numcorrepc
+            nCols = len(colArr) + 1
+            f, axArr = plt.subplots(nRows, nCols)
+            f.set_size_inches(19.2, 10.8)
+
+            for i in range(nRows):
+                axArr[i, 0].set_ylabel('PC%d' % i)
+
+                for j in range(nCols)[:-1]:
+                    P.correlationAxisPlot(colArr[j], tomo_obs_norm__zk[:, i], axArr[i, j])
+
+                axArr[i, nCols - 1].plot(P.l_obs, eigVec_obs_norm__lk[:, i])
+                plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
+
+            f.subplots_adjust(hspace = 0.0)
+            f.subplots_adjust(wspace = 0.05)
+
+            plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
+            plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
+            plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
+
+            for i in range(nCols):
+                axArr[0, i].set_title(colNames[i])
+
+            plt.suptitle(r'Correlations - OBS NORM')
+            f.savefig('%s-corre_logf_obs_norm_popx.png' % P.K.califaID)
+            plt.close()
+
+            ############################### SYN NORM ###############################
+            f, axArr = plt.subplots(nRows, nCols)
+            f.set_size_inches(19.2, 10.8)
+
+            for i in range(nRows):
+                axArr[i, 0].set_ylabel('PC%d' % i)
+
+                for j in range(nCols)[:-1]:
+                    P.correlationAxisPlot(colArr[j], tomo_syn_norm__zk[:, i], axArr[i, j])
+
+                axArr[i, nCols - 1].plot(P.l_syn, eigVec_syn_norm__lk[:, i])
+                plt.setp(axArr[i, nCols - 1].get_yticklabels(), visible = False)
+
+            f.subplots_adjust(hspace = 0.0)
+            f.subplots_adjust(wspace = 0.05)
+
+            plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
+            plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
+            plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
+
+            for i in range(nCols):
+                axArr[0, i].set_title(colNames[i])
+
+            plt.suptitle(r'Correlations - SYN NORM')
+            f.savefig('%s-corre_logf_syn_norm_popx.png' % P.K.califaID)
+            plt.close()

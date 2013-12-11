@@ -115,9 +115,6 @@ def tomoPlot(t, l, eigvec, eigval, ms, ti, npref):
 
 if __name__ == '__main__':
     args = parser_args()
-    args.correlat = True
-    args.tomograms = True
-    args.califaID = 'K0277'
 
     # This call of PCAlifa is only to use P.K.zoneToYX(), P.K.N_zone and PCA methods;
     P = PCA.PCAlifa(args.califaID, args.fitsDir, False)
@@ -176,9 +173,6 @@ if __name__ == '__main__':
 
     l = np.array(l, dtype = np.int)
 
-
-
-
     ########### MASKS ###########
     mask = (flux__lz[lineindex['4861']] > 0) & (flux__lz[lineindex['5007']] > 0)
     mask &= (f_Ha__z > 0) & (flux__lz[lineindex['6583']] > 0)
@@ -199,8 +193,6 @@ if __name__ == '__main__':
     print "Galaxia com %i zonas. %i mascaradas" % (P.K.N_zone, P.K.N_zone - np.where(masklines == True)[0].shape[0])
     masklines__lz = ~(masklines & np.ones(flux__lz.shape, dtype = np.bool))
 
-
-
     ########### MASKED DATA ###########
     flux_m__lz = np.ma.array(flux__lz, mask = masklines__lz, fill_value = np.nan)
     flux_m_normHa__lz = np.ma.array(flux__lz, mask = masklines__lz, fill_value = np.nan)
@@ -208,8 +200,6 @@ if __name__ == '__main__':
     ew_m__lz = np.ma.array(ew__lz, mask = masklines__lz, fill_value = np.nan)
 
     flux_m_normHa__lz = flux_m_normHa__lz / f_Ha__z
-
-
 
     ########### PCA ###########
     I_flux__zl, ms_flux__l, covMat_flux__ll, eigVal_flux__k, eigVec_flux__lk = P.PCA(flux_m_normHa__lz.T, P.K.N_zone, 0)
@@ -290,6 +280,7 @@ if __name__ == '__main__':
 
         f.subplots_adjust(hspace = 0.0)
         f.subplots_adjust(wspace = 0.05)
+
         plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
         plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
         plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
