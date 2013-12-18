@@ -221,9 +221,9 @@ if __name__ == '__main__':
         npref_ew = '%s%s_' % (npref_ew, args.outputfname)
 
     if args.tomograms:
-        P.screeTestPlot(eigVal_flux__k, args.tmax, npref_flux, '%s flux' % P.K.califaID)
-        P.screeTestPlot(eigVal_fwhm__k, args.tmax, npref_fwhm, '%s fwhm' % P.K.califaID)
-        P.screeTestPlot(eigVal_ew__k, args.tmax, npref_ew, '%s ew' % P.K.califaID)
+        P.screeTestPlot(eigVal_flux__k, args.tmax, '%s flux' % P.K.califaID, npref_flux)
+        P.screeTestPlot(eigVal_fwhm__k, args.tmax, '%s fwhm' % P.K.califaID, npref_fwhm)
+        P.screeTestPlot(eigVal_ew__k, args.tmax, '%s ew' % P.K.califaID, npref_ew)
 
         for ti in range(args.tmax):
             tomoPlot(tomo_flux__kyx, l, eigVec_flux__lk, eigVal_flux__k, ms_flux__l, ti, npref_flux)

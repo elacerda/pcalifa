@@ -31,8 +31,6 @@ class PCAlifa:
             if len(lc):
                 self.setLambdaConstrains(lc)
 
-            self.quantilQFlag = quantilQFlag
-
             if quantilQFlag:
                 self.setQFlag(quantilQFlag)
 
@@ -410,11 +408,15 @@ class PCAlifa:
 #        ax3.set_xlabel(r'$R_{50}$')
 
         plt.tight_layout()
-        fig.savefig('%stomo_%02i.png' % (npref, ti))
-        plt.close()
 
-    def screeTestPlot(self, eigval, maxInd, npref, title):
-        fig = plt.figure(figsize = (8, 6))
+        if npref:
+            fig.savefig('%stomo_%02i.png' % (npref, ti))
+        else:
+            fig.show()
+
+    def screeTestPlot(self, eigval, maxInd, title, npref):
+        f = plt.figure()
+        f.set_size_inches(19.2, 10.8)
         eigval_norm = 100. * eigval / eigval.sum()
         plt.plot(eigval_norm[:maxInd], linestyle = '-', marker = '*')
         plt.ylim([0, eigval_norm[1] * 1.1])
@@ -423,8 +425,11 @@ class PCAlifa:
         plt.xlabel(r'Principal component')
         plt.ylabel(r'Normalized variance [$\%%$]')
         plt.grid()
-        fig.savefig('%sscree.png' % npref)
-        plt.close()
+
+        if npref:
+            f.savefig('%sscree.png' % npref)
+        else:
+            f.show()
 
     def nToStrSciNot(self, n):
         e = np.floor(np.log10(np.abs(n)))
@@ -446,6 +451,8 @@ class PCAlifa:
         plt.xlabel(r'Wavelength $[\AA]$')
         plt.title(r'Mask check (zone 0)')
         plt.grid()
-        f.savefig('%ssanity_check.png' % npref)
 
-
+        if npref:
+            f.savefig('%ssanity_check.png' % npref)
+        else:
+            f.show()

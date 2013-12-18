@@ -146,8 +146,8 @@ def zoneRebuildSpec(iZone, evRebArr, l, O, tomo, eVec, eVal, mean, nPref, resid)
     f.savefig(fname)
     plt.close()
 
-def correlations_PCxPhys_eigv_plot(P, eigv__lk, PCArr__zk, nPC, l_obs, title, fname):
 
+def correlations_PCxPhys_eigv_plot(P, eigv__lk, PCArr__zk, nPC, l_obs, title, fname):
     prop = {
         'arr'   : [ P.K.at_flux__z, np.log10(P.K.aZ_flux__z / 0.019), P.K.A_V, P.K.v_0, P.K.v_d ],
         'label' : [ r'$\log\ t\ [yr]$', r'$\log\ Z\ [Z_\odot]$', r'$A_V\ [mag]$', r'$v_\star\ [km/s]$', r'$\sigma_\star\ [km/s]$', r'eigenvector' ],
@@ -162,9 +162,10 @@ def correlations_PCxPhys_eigv_plot(P, eigv__lk, PCArr__zk, nPC, l_obs, title, fn
         axArr[i, 0].set_ylabel('PC%d' % i)
         ymin = PCArr__zk[:, i].min()
         ymax = PCArr__zk[:, i].max()
-        axArr[i, 0].set_ylim(ymin, ymax)
 
         for j in range(nCols)[:-1]:
+            ax = axArr[i, j]
+            ax.set_ylim(ymin, ymax)
             P.correlationAxisPlot(prop['arr'][j], PCArr__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(l_obs, eigv__lk[:, i])
@@ -181,8 +182,11 @@ def correlations_PCxPhys_eigv_plot(P, eigv__lk, PCArr__zk, nPC, l_obs, title, fn
         axArr[0, i].set_title(prop['label'][i])
 
     plt.suptitle(title)
-    f.savefig(fname)
-    plt.close()
+
+    if (fname):
+        f.savefig(fname)
+    else:
+        plt.show()
 
 def correlations_PCxPC_plot(P, PCArr__zk, nPC, title, fnamepref):
     prop = {
@@ -192,9 +196,12 @@ def correlations_PCxPC_plot(P, PCArr__zk, nPC, title, fnamepref):
     }
 
     for p_i, p in enumerate(prop['arr']):
-        nRows = nPC
-        nCols = nPC
+        nRows = nPC - 1
+        nCols = nPC - 1
         f, axArr = plt.subplots(nRows, nCols)
+
+        for ax in f.axes:
+            ax.set_axis_off()
 
         fig_width_pt = 1080.
         inches_per_pt = 1.0 / 72.27
@@ -206,21 +213,28 @@ def correlations_PCxPC_plot(P, PCArr__zk, nPC, title, fnamepref):
         f.set_dpi(200)
 
         for i in range(nRows):
-            axArr[i, 0].set_ylabel('PC%d' % i)
-            ymin = PCArr__zk[:, i].min()
-            ymax = PCArr__zk[:, i].max()
-            axArr[i, 0].set_ylim(ymin, ymax)
+            y_i = i
 
-            for j in range(nCols):
+            ymin = PCArr__zk[:, y_i].min()
+            ymax = PCArr__zk[:, y_i].max()
+
+            for j in range(i, nCols):
                 ax = axArr[i, j]
+                ax.set_axis_on()
 
-                xmin = PCArr__zk[:, j].min()
-                xmax = PCArr__zk[:, j].max()
+                x_i = j + 1
+
+                xmin = PCArr__zk[:, x_i].min()
+                xmax = PCArr__zk[:, x_i].max()
                 ax.set_xlim(xmin, xmax)
+                ax.set_ylim(ymin, ymax)
 
-                x = PCArr__zk[:, j]
-                y = PCArr__zk[:, i]
+                x = PCArr__zk[:, x_i]
+                y = PCArr__zk[:, y_i]
                 z = p
+
+                plt.setp(ax.get_xticklabels(), visible = False)
+                plt.setp(ax.get_yticklabels(), visible = False)
 
                 rhoPearson, pvalPearson = st.pearsonr(x, y)
                 rhoSpearman, pvalSpearman = st.spearmanr(x, y)
@@ -248,6 +262,10 @@ def correlations_PCxPC_plot(P, PCArr__zk, nPC, title, fnamepref):
                         weight = 'bold')
                 plt.setp(ax.get_yticklabels(), visible = False)
 
+            axArr[i, i].set_ylabel('PC%d' % i)
+            plt.setp(axArr[i, i].get_xticklabels(), visible = True, rotation = 45)
+            plt.setp(axArr[i, i].get_yticklabels(), visible = True, rotation = 45)
+
         f.subplots_adjust(hspace = 0.0)
         f.subplots_adjust(wspace = 0.0)
         f.subplots_adjust(right = 0.8)
@@ -255,16 +273,15 @@ def correlations_PCxPC_plot(P, PCArr__zk, nPC, title, fnamepref):
         cb = f.colorbar(im, cax = cbar_ax)
         cb.set_label(prop['label'][p_i])
 
-        plt.setp([a.get_xticklabels() for a in f.axes], rotation = 45)
-        plt.setp([a.get_xticklabels() for a in f.axes[:-(nCols + 1)]], visible = False)
-        plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
-
         for i in range(nCols):
-            axArr[0, i].set_title('PC%d' % i)
+            axArr[0, i].set_title('PC%d' % (i + 1))
 
         plt.suptitle(r'%s - %s' % (title, prop['fname'][p_i]))
-        f.savefig('%scorre_PCxPC_%s.png' % (fnamepref, prop['fname'][p_i]))
-        plt.close()
+
+        if fnamepref:
+            f.savefig('%scorre_PCxPC_%s.png' % (fnamepref, prop['fname'][p_i]))
+        else:
+            plt.show()
 
 def correlations_PCxPopulations_eigv(P, eigv__lk, PCArr__zk, nPC, l_obs, title, fname):
     arrInd_1 = range(0, 5)
@@ -299,9 +316,9 @@ def correlations_PCxPopulations_eigv(P, eigv__lk, PCArr__zk, nPC, l_obs, title, 
         axArr[i, 0].set_ylabel('PC%d' % i)
         ymin = PCArr__zk[:, i].min()
         ymax = PCArr__zk[:, i].max()
-        axArr[i, 0].set_ylim(ymin, ymax)
 
         for j in range(nCols)[:-1]:
+            axArr[i, j].set_ylim(ymin, ymax)
             P.correlationAxisPlot(popx['arr'][j], PCArr__zk[:, i], axArr[i, j])
 
         axArr[i, nCols - 1].plot(l_obs, eigv__lk[:, i])
@@ -318,8 +335,11 @@ def correlations_PCxPopulations_eigv(P, eigv__lk, PCArr__zk, nPC, l_obs, title, 
         axArr[0, i].set_title(popx['label'][i])
 
     plt.suptitle(title)
-    f.savefig(fname)
-    plt.close()
+
+    if fname:
+        f.savefig(fname)
+    else:
+        plt.show()
 
 if __name__ == '__main__':
     args = parser_args()
@@ -362,12 +382,12 @@ if __name__ == '__main__':
         ############################## Tomograms ################################
 
         if args.tomograms:
-            P.screeTestPlot(P.eigVal_obs__k, args.tmax, npref_f_obs, '%s FOBS' % P.K.califaID)
-            P.screeTestPlot(P.eigVal_obs_norm__k, args.tmax, npref_f_obs_norm, '%s FOBS NORM' % P.K.califaID)
-            P.screeTestPlot(P.eigVal_syn__k, args.tmax, npref_f_syn, '%s FSYN' % P.K.califaID)
-            P.screeTestPlot(P.eigVal_syn_norm__k, args.tmax, npref_f_syn_norm, '%s FSYN NORM' % P.K.califaID)
-            P.screeTestPlot(P.eigVal_res__k, args.tmax, npref_f_res, '%s RES' % P.K.califaID)
-            P.screeTestPlot(P.eigVal_res_norm__k, args.tmax, npref_f_res_norm, '%s RES NORM' % P.K.califaID)
+            P.screeTestPlot(P.eigVal_obs__k, args.tmax, '%s FOBS' % P.K.califaID, npref_f_obs)
+            P.screeTestPlot(P.eigVal_obs_norm__k, args.tmax, '%s FOBS NORM' % P.K.califaID, npref_f_obs_norm)
+            P.screeTestPlot(P.eigVal_syn__k, args.tmax, '%s FSYN' % P.K.califaID, npref_f_syn)
+            P.screeTestPlot(P.eigVal_syn_norm__k, args.tmax, '%s FSYN NORM' % P.K.califaID, npref_f_syn_norm)
+            P.screeTestPlot(P.eigVal_res__k, args.tmax, '%s RES' % P.K.califaID, npref_f_res)
+            P.screeTestPlot(P.eigVal_res_norm__k, args.tmax, '%s RES NORM' % P.K.califaID, npref_f_res_norm)
 
             for ti in range(args.tmax):
                 P.tomoPlot(P.tomo_obs__kyx, P.l_obs, P.eigVec_obs__lk, P.eigVal_obs__k, P.ms_obs__l, ti, npref_f_obs)
@@ -469,10 +489,10 @@ if __name__ == '__main__':
             tomo_syn_norm__zk, tomo_syn_norm__kyx = P.tomogram(I_syn_norm__zl, eigVec_syn_norm__lk)
 
             if args.tomograms:
-                P.screeTestPlot(eigVal_obs__k, args.tmax, npref_f_obs, '%s LOG FOBS' % P.K.califaID)
-                P.screeTestPlot(eigVal_obs_norm__k, args.tmax, npref_f_obs_norm, '%s LOG FOBS NORM' % P.K.califaID)
-                P.screeTestPlot(eigVal_syn__k, args.tmax, npref_f_syn, '%s LOG FSYN' % P.K.califaID)
-                P.screeTestPlot(eigVal_syn_norm__k, args.tmax, npref_f_syn_norm, '%s LOG FSYN NORM' % P.K.califaID)
+                P.screeTestPlot(eigVal_obs__k, args.tmax, '%s LOG FOBS' % P.K.califaID, npref_f_obs)
+                P.screeTestPlot(eigVal_obs_norm__k, args.tmax, '%s LOG FOBS NORM' % P.K.califaID, npref_f_obs_norm)
+                P.screeTestPlot(eigVal_syn__k, args.tmax, '%s LOG FSYN' % P.K.califaID, npref_f_syn)
+                P.screeTestPlot(eigVal_syn_norm__k, args.tmax, '%s LOG FSYN NORM' % P.K.califaID, npref_f_syn_norm)
 
                 for ti in range(args.tmax):
                     P.tomoPlot(tomo_obs__kyx, P.l_obs, eigVec_obs__lk, eigVal_obs__k, ms_obs__l, ti, npref_f_obs)
@@ -541,8 +561,8 @@ if __name__ == '__main__':
         #########################################################################
         ############################## Tomograms ################################
         if args.tomograms:
-            P.screeTestPlot(eigVal_res__k, args.tmax, npref_f_res, '%s RES' % P.K.califaID)
-            P.screeTestPlot(eigVal_res_norm__k, args.tmax, npref_f_res_norm, '%s RES NORM' % P.K.califaID)
+            P.screeTestPlot(eigVal_res__k, args.tmax, '%s RES' % P.K.califaID, npref_f_res)
+            P.screeTestPlot(eigVal_res_norm__k, args.tmax, '%s RES NORM' % P.K.califaID, npref_f_res_norm)
 
             for ti in range(args.tmax):
                 P.tomoPlot(tomo_res__kyx, l_obs, eigVec_res__lk, eigVal_res__k, ms_res__l, ti, npref_f_res)
