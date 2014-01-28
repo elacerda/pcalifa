@@ -35,6 +35,8 @@ class PCAlifa:
             if quantilQFlag:
                 self.setQFlag(quantilQFlag)
 
+            self.CALIFACubeInfo()
+
     def readCALIFACube(self, califaID, fitsDir = fitsDirDefault):
         self.califaID = califaID
 
@@ -50,8 +52,6 @@ class PCAlifa:
         self.maskLambdaConstrains = self.maskEmLines
 
         self._setVars()
-
-        self.CALIFACubeInfo()
 
     def CALIFACubeInfo(self):
         K = self.K
@@ -74,10 +74,13 @@ class PCAlifa:
         print 'N l_obs: %d, l_ini: %d, l_fin: %d' % (K.l_obs.size, K.l_ini, K.l_fin)
         print 'PCALifa:'
         print 'N l_obs: %d, l_ini: %d, l_fin: %d' % (self.l_obs.size, self.l_obs[0], K.l_obs[-1])
-        print 'maskEmLine'
-        print 'N l_obs: %d' % K.l_obs[self.maskEmLines].size
+        print 'maskLambdaConstrains'
+        print 'N l_obs: %d' % K.l_obs[self.maskLambdaConstrains].size
         print 'maskQFlag'
         print 'N l_obs: %d' % K.l_obs[self.maskQFlag].size
+        print 'maskQFlag + lambda constrains'
+        print 'N l_obs: %d' % K.l_obs[self.maskQFlag & self.maskLambdaConstrains].size
+
 
 #    def pixDevLineFluxRestFrame(self, modelLineFluxMax = 6562.85, searchRange = 30):
 #        self.restFrameLine = modelLineFluxMax
@@ -326,6 +329,11 @@ class PCAlifa:
         self.tStarlight = t
         self.maskEmLines = mask
         self._setVars()
+
+        print 'maskEmLines'
+        print 'N l_obs: %d' % self.K.l_obs[self.maskEmLines].size
+        print 'maskEmLines + lambda constrains'
+        print 'N l_obs: %d' % self.K.l_obs[self.maskEmLines & self.maskLambdaConstrains].size
 
     def unsetStarlightMaskFile(self):
         self.starlightMaskFile = None
