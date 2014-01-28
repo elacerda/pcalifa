@@ -51,6 +51,34 @@ class PCAlifa:
 
         self._setVars()
 
+        self.CALIFACubeInfo()
+
+    def CALIFACubeInfo(self):
+        K = self.K
+
+        print 'Galaxy Name: %s' % K.galaxyName
+        print 'CALIFA ID: %s' % K.califaID
+        print 'N zones: %d' % K.N_zone
+        print 'N X: %d' % K.N_x
+        print 'N Y: %d' % K.N_y
+
+        total = K.zoneArea_pix.size
+        onepix = np.where(K.zoneArea_pix == 1)[0].size
+        morethanten = np.where(K.zoneArea_pix > 10)[0].size
+        onepixperc = onepix / np.double(total)
+        morethantenperc = morethanten / np.double(total)
+
+        print 'zoneArea pix: %d' % total
+        print '1 zones - 1 pix: %d (ratio: %f)' % (onepix, onepixperc)
+        print '1 zone > 10 pix: %d (ratio: %f)' % (morethanten, morethantenperc)
+        print 'N l_obs: %d, l_ini: %d, l_fin: %d' % (K.l_obs.size, K.l_ini, K.l_fin)
+        print 'PCALifa:'
+        print 'N l_obs: %d, l_ini: %d, l_fin: %d' % (self.l_obs.size, self.l_obs[0], K.l_obs[-1])
+        print 'maskEmLine'
+        print 'N l_obs: %d' % K.l_obs[self.maskEmLines].size
+        print 'maskQFlag'
+        print 'N l_obs: %d' % K.l_obs[self.maskQFlag].size
+
 #    def pixDevLineFluxRestFrame(self, modelLineFluxMax = 6562.85, searchRange = 30):
 #        self.restFrameLine = modelLineFluxMax
 #
