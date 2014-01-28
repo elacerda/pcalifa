@@ -243,9 +243,9 @@ def correlations_PCxPC_plot(P, PCArr__zk, nPC, title, fnamepref):
 
                 if (prop['fname'])[p_i] == 'vd' :
                     prc = np.percentile(p, 98.)
-                    im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral, vmax = prc)
+                    im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.jet, vmax = prc)
                 else:
-                    im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.spectral)
+                    im = ax.scatter(x, y, c = z, edgecolor = 'None', s = 3, cmap = cm.jet)
 
                 ax.text(0.95, 0.88, pTxt,
                         fontsize = 10, transform = ax.transAxes,
@@ -309,10 +309,10 @@ def correlations_PCxPopulations_eigv(P, eigv__lk, PCArr__zk, nPC, l_obs, title, 
     popx['arr'].append(np.tensordot((P.K.popx.sum(axis = 1))[maskpopx4, :], logt[maskpopx4], (0, 0)) / popxtot)
 
     nCols = len(popx['label'])
-    f, axArr = plt.subplots(nRows, nCols)
+    f, axArr = plt.subplots(nPC, nCols)
     f.set_size_inches(19.2, 10.8)
 
-    for i in range(nRows):
+    for i in range(nPC):
         axArr[i, 0].set_ylabel('PC%d' % i)
         ymin = PCArr__zk[:, i].min()
         ymax = PCArr__zk[:, i].max()
@@ -504,13 +504,12 @@ if __name__ == '__main__':
             ############################# Correlations ##############################
             if args.correlat:
                 nRows = args.numcorrepc
-
                 #########################################################################
                 ######################## PC-Phys Correlations ###########################
                 ############################### OBS NORM ###############################
                 correlations_PCxPhys_eigv_plot(P, eigVec_obs_norm__lk, tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre.png' % npref_f_obs_norm)
                 ############################### SYN NORM ###############################
-                correlations_PCxPhys_eigv_plot(P, eigVec_syn_norm__lk, tomo_syn_norm__zk, nRows, P.l_obs, r'Correlations - SYN NORM', '%scorre.png' % npref_f_syn_norm)
+                correlations_PCxPhys_eigv_plot(P, eigVec_syn_norm__lk, tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre.png' % npref_f_syn_norm)
 
                 #########################################################################
                 ######################### PC-PC Correlations ############################
@@ -524,7 +523,7 @@ if __name__ == '__main__':
                 ############################### OBS NORM ################################
                 correlations_PCxPopulations_eigv(P, eigVec_obs_norm__lk, tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre_popx.png' % npref_f_obs_norm)
                 ############################### SYN NORM ###############################
-                correlations_PCxPopulations_eigv(P, eigVec_syn_norm__lk, tomo_syn_norm__zk, nRows, P.l_obs, r'Correlations - SYN NORM', '%scorre_popx.png' % npref_f_syn_norm)
+                correlations_PCxPopulations_eigv(P, eigVec_syn_norm__lk, tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre_popx.png' % npref_f_syn_norm)
 
     #########################################################################
     ######### PCA just in intervals defined in StarlightMaskFile ############

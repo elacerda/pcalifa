@@ -11,6 +11,7 @@ from pycasso.fitsdatacube import fitsQ3DataCube
 from pystarlight import io
 from scipy import linalg
 from scipy import stats as st
+from matplotlib import cm
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -182,7 +183,8 @@ class PCAlifa:
 
     def _setVars(self):
         mask = self.maskEmLines & self.maskLambdaConstrains & self.maskQFlag
-        synMask = self.maskLambdaConstrains & self.maskQFlag
+        # synMask = self.maskLambdaConstrains & self.maskQFlag
+        synMask = mask
 
         self.l_obs = self.K.l_obs[mask]
         self.l_syn = self.K.l_obs[synMask]
@@ -386,7 +388,7 @@ class PCAlifa:
 
         ax1.set_title(r'tomogram $%02i$' % ti)
         im = ax1.imshow(tomogram, origin = 'lower', interpolation = 'nearest', aspect = 'auto')
-        fig.colorbar(ax = ax1, mappable = im, use_gridspec = True)
+        fig.colorbar(ax = ax1, mappable = im, use_gridspec = True, cmap = cm.jet)
 
         eigval_norm = 100. * eigval[ti] / eigval.sum()
         ax2.set_title(r'Eigenvalue $%s$ ($%.2f\ \%%$)' % (self.nToStrSciNot(eigval[ti]), eigval_norm))
