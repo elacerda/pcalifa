@@ -22,12 +22,20 @@ quantilFlagDefault = 0.9
 fitsFilenameSuffix = '_synthesis_eBR_v20_q036.d13c512.ps03.k2.mC.CCM.Bgsd61.fits'
 
 class PCAlifa:
-    def __init__(self, califaID = False, fitsDir = fitsDirDefault, quantilQFlag = quantilFlagDefault, lc = []):
+    # Remove califaID and fitsDir... let only FITS load by fitsFile
+    def __init__(self, califaID = False, fitsDir = fitsDirDefault, quantilQFlag = quantilFlagDefault, lc = [], fitsFile = False):
         self.califaID = califaID
         self._initVars()
 
-        if califaID:
-            self.readCALIFACube(self.califaID, fitsDir)
+        if califaID or fitsFile:
+            if not fitsFile:
+                fitsFile = '%s/%s%s' % (fitsDir, self.califaID, fitsFilenameSuffix)
+
+            self.fitsFile = fitsFile
+            self.readCALIFACube()
+
+            # XXX search for califaID from fitsName
+            self.califaID = self.K.califaID
 
             if len(lc):
                 self.setLambdaConstrains(lc)
@@ -37,13 +45,12 @@ class PCAlifa:
 
             self.CALIFACubeInfo()
 
-    def readCALIFACube(self, califaID, fitsDir = fitsDirDefault):
-        self.califaID = califaID
+    def readCALIFACube(self, fitsFile = False):
 
         self._initVars()
 
-        self.fitsDir = fitsDir
-        self.fitsFile = '%s/%s/%s%s' % (fitsDir, califaID, califaID, fitsFilenameSuffix)
+        if fitsFile:
+            self.fitsFile = fitsFile
 
         self.K = fitsQ3DataCube(self.fitsFile)
 
@@ -138,17 +145,20 @@ class PCAlifa:
 #        self.f_obs_rf__zl = f_obs_rf__lz.T
 #        self.f_syn_rf__zl = f_syn_rf__lz.T
 
-    def PCA(self, arr, num, axis = -1, arrMean = False):
+    def PCA(self, arr, num, axis = -1, arrMean = False, sort = True):
         if not arrMean:
             arrMean = arr.mean(axis = axis)
 
         diff = arr - arrMean
         covMat = np.dot(diff.T, diff) / (num - 1.)
         w, e = linalg.eigh(covMat)
+        wS = w
+        eS = e
 
-        S = np.argsort(w)[::-1]
-        wS = w[S]
-        eS = e[:, S]
+        if sort:
+            S = np.argsort(w)[::-1]
+            wS = w[S]
+            eS = e[:, S]
 
         return diff, arrMean, covMat, wS, eS
 
@@ -334,6 +344,8 @@ class PCAlifa:
         print 'N l_obs: %d' % self.K.l_obs[self.maskEmLines].size
         print 'maskEmLines + lambda constrains'
         print 'N l_obs: %d' % self.K.l_obs[self.maskEmLines & self.maskLambdaConstrains].size
+        print 'maskEmLines + maskQFlag + lambda constrains'
+        print 'N l_obs: %d' % self.K.l_obs[self.maskEmLines & self.maskQFlag & self.maskLambdaConstrains].size
 
     def unsetStarlightMaskFile(self):
         self.starlightMaskFile = None
