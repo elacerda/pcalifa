@@ -29,7 +29,7 @@ class PCAlifa:
 
         if califaID or fitsFile:
             if not fitsFile:
-                fitsFile = '%s/%s%s' % (fitsDir, self.califaID, fitsFilenameSuffix)
+                fitsFile = '%s/%s/%s%s' % (fitsDir, self.califaID, self.califaID, fitsFilenameSuffix)
 
             self.fitsFile = fitsFile
             self.readCALIFACube()
