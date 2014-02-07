@@ -4,7 +4,7 @@ Created on 17/04/2013
 @author: lacerda
 '''
 import matplotlib
-matplotlib.use('agg')
+matplotlib.use('PDF')
 import numpy as np
 import atpy
 from pycasso.fitsdatacube import fitsQ3DataCube
@@ -20,6 +20,56 @@ fitsDirDefault = '/home/lacerda/CALIFA/gal_fits'
 quantilFlagDefault = 0.9
 # fitsFilenameSuffix = '_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits'
 fitsFilenameSuffix = '_synthesis_eBR_v20_q036.d13c512.ps03.k2.mC.CCM.Bgsd61.fits'
+imgFileSuffix = 'pdf'
+
+plt.rcParams.update({'font.family' : 'serif',
+                     'text.usetex' : False,
+                     })
+
+def set_eps_output_1():
+    # From http://www.scipy.org/Cookbook/Matplotlib/LaTeX_Examples
+    fig_width_pt = 448.07378
+    inches_per_pt = 1.0 / 72.27
+    golden_mean = (np.sqrt(5) - 1.0) / 2.0
+    fig_width = fig_width_pt * inches_per_pt
+    fig_height = fig_width * golden_mean * 0.85
+    fig_size = (fig_width, fig_height)
+    params = {'backend': imgFileSuffix,
+              'axes.labelsize': 10,
+              'text.fontsize': 10,
+              'legend.fontsize': 8,
+              'xtick.labelsize': 10,
+              'ytick.labelsize': 10,
+              'text.usetex': True,
+              'font.family': 'serif',
+              'figure.subplot.hspace': .5,
+              'figure.subplot.bottom': 0.12,
+              'figure.figsize': fig_size}
+    plt.rcParams.update(params)
+
+def set_eps_output_2x1():
+    # From http://www.scipy.org/Cookbook/Matplotlib/LaTeX_Examples
+    fig_width_pt = 448.07378
+    inches_per_pt = 1.0 / 72.27
+    golden_mean = (np.sqrt(5) - 1.0) / 2.0
+    fig_width = fig_width_pt * inches_per_pt
+    fig_height = fig_width * golden_mean
+    fig_size = (fig_width, fig_height)
+    params = {'backend': imgFileSuffix,
+              'axes.labelsize': 10,
+              'text.fontsize': 10,
+              'legend.fontsize': 8,
+              'xtick.labelsize': 10,
+              'ytick.labelsize': 10,
+              'text.usetex': True,
+              'font.family': 'serif',
+              'figure.subplot.hspace': .5,
+              'figure.figsize': fig_size}
+    plt.rcParams.update(params)
+
+# FIXME: take only ten percent of points
+def oneInTen(arr):
+    return (np.random.rand(len(arr)) < 0.1) & arr
 
 class PCAlifa:
     # Remove califaID and fitsDir... let only FITS load by fitsFile
@@ -46,7 +96,6 @@ class PCAlifa:
             self.CALIFACubeInfo()
 
     def readCALIFACube(self, fitsFile = False):
-
         self._initVars()
 
         if fitsFile:
@@ -424,12 +473,15 @@ class PCAlifa:
             plt.setp(ax.get_yticklabels(), visible = False)
 
     def tomoPlot(self, t, l, eigvec, eigval, ms, ti, npref):
+        # set_eps_output_1()
+
         tomogram = t[ti, :, :]
         x = l
         y = eigvec[:, ti]
         y2 = ms
 
         fig = plt.figure(figsize = (15, 5))
+        # fig = plt.figure()
         gs = gridspec.GridSpec(1, 2, width_ratios = [4, 7])
         ax1 = plt.subplot(gs[0])
         ax2 = plt.subplot(gs[1])
@@ -443,6 +495,7 @@ class PCAlifa:
         ax2.plot(x, y)
         ax2.xaxis.set_major_locator(MaxNLocator(20))
         ax2.set_ylabel(r'$PC %02i$' % ti)
+        plt.setp(ax2.get_xticklabels(), rotation = 45)
         ax2.grid()
 
         ax3 = ax2.twinx()
@@ -460,11 +513,12 @@ class PCAlifa:
         plt.tight_layout()
 
         if npref:
-            fig.savefig('%stomo_%02i.png' % (npref, ti))
+            fig.savefig('%stomo_%02i.%s' % (npref, ti, imgFileSuffix))
         else:
             fig.show()
 
     def screeTestPlot(self, eigval, maxInd, title, npref):
+        # set_eps_output_1()
         f = plt.figure()
         f.set_size_inches(19.2, 10.8)
         eigval_norm = 100. * eigval / eigval.sum()
@@ -477,9 +531,9 @@ class PCAlifa:
         plt.grid()
 
         if npref:
-            f.savefig('%sscree.png' % npref)
+            plt.savefig('%sscree.%s' % (npref, imgFileSuffix))
         else:
-            f.show()
+            plt.show()
 
     def nToStrSciNot(self, n):
         e = np.floor(np.log10(np.abs(n)))
@@ -493,6 +547,7 @@ class PCAlifa:
         return nStr
 
     def sanityCheck(self, x, y, npref):
+        # set_eps_output_1()
         f = plt.figure()
         f.set_size_inches(19.2, 10.8)
         plt.plot(x, y)
@@ -503,6 +558,6 @@ class PCAlifa:
         plt.grid()
 
         if npref:
-            f.savefig('%ssanity_check.png' % npref)
+            f.savefig('%ssanity_check.%s' % (npref, imgFileSuffix))
         else:
             f.show()
