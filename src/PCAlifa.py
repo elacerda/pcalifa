@@ -365,9 +365,17 @@ class PCAlifa:
         self._setVars()
 
     def setQFlag(self, quantil):
+        K = self.K
         self.quantilQFlag = quantil
-        self.histo = self.K.f_flag.sum(axis = 1) / self.K.N_zone
-        self.maskQFlag = (self.histo < quantil)
+
+        f_flag = K.f_flag
+
+        for i in range(K.N_zone):
+            badpix = np.where(K.f_flag[:, i] > 0)[0]
+            f_flag[badpix, i] = 1
+
+        self.histo = f_flag.sum(axis = 1) / K.N_zone
+        self.maskQFlag = (self.histo < (1.0 - quantil))
         self._setVars()
 
     def unsetQFlag(self):
