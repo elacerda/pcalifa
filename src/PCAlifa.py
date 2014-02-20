@@ -315,7 +315,7 @@ class PCAlifa:
         self.covMat_obs_norm__ll = False
         self.eigVal_obs_norm__k = False
         self.eigVec_obs_norm__lk = False
-        self.tomo_obs_norm_zk = False
+        self.tomo_obs_norm__zk = False
         self.tomo_obs_norm__kyx = False
 
         self.I_syn__zl = False
@@ -368,13 +368,7 @@ class PCAlifa:
         K = self.K
         self.quantilQFlag = quantil
 
-        f_flag = K.f_flag
-
-        for i in range(K.N_zone):
-            badpix = np.where(K.f_flag[:, i] > 0)[0]
-            f_flag[badpix, i] = 1
-
-        self.histo = f_flag.sum(axis = 1) / K.N_zone
+        self.histo = (K.f_flag > 0).astype(int).sum(axis = 1) / K.N_zone
         self.maskQFlag = (self.histo < (1.0 - quantil))
         self._setVars()
 
@@ -463,7 +457,7 @@ class PCAlifa:
             rhoSpearman, pvalSpearman = st.spearmanr(x, y)
             pTxt = 'p: %.2f' % rhoPearson
             spTxt = 's: %.2f' % rhoSpearman
-            ax.plot(x, y, '.')
+            ax.scatter(x, y, '.', lw = 0)
             ax.text(0.95, 0.88, pTxt,
                     fontsize = 10, transform = ax.transAxes,
                     horizontalalignment = 'right',
