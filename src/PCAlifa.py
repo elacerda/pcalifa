@@ -197,7 +197,7 @@ class PCAlifa:
 #        self.f_syn_rf__zl = f_syn_rf__lz.T
 
     def PCA(self, arr, num, axis = -1, arrMean = False, sort = True):
-        if not arrMean.any():
+        if not arrMean or not arrMean.any():
             arrMean = arr.mean(axis = axis)
 
         diff = arr - arrMean
