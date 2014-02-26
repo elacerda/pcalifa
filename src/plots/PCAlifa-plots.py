@@ -4,7 +4,7 @@ Created on 10/06/2013
 @author: lacerda
 '''
 import matplotlib
-matplotlib.use('PDF')
+matplotlib.use('agg')
 import sys
 import numpy as np
 import PCAlifa as PCA
@@ -15,7 +15,7 @@ from scipy import stats as st
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 
-imgFileSuffix = 'pdf'
+imgFileSuffix = 'png'
 plt.rcParams.update({'font.family' : 'serif',
                      'text.usetex' : False,
                      })

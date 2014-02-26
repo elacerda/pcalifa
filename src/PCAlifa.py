@@ -4,7 +4,7 @@ Created on 17/04/2013
 @author: lacerda
 '''
 import matplotlib
-matplotlib.use('PDF')
+matplotlib.use('agg')
 import numpy as np
 import atpy
 from pycasso.fitsdatacube import fitsQ3DataCube
@@ -19,8 +19,10 @@ from matplotlib.ticker import MaxNLocator
 fitsDirDefault = '/home/lacerda/CALIFA/gal_fits'
 quantilFlagDefault = 0.9
 # fitsFilenameSuffix = '_synthesis_eBR_v20_q027.d13c512.ps3b.k1.mC.CCM.Bgsd01.v01.fits'
-fitsFilenameSuffix = '_synthesis_eBR_v20_q036.d13c512.ps03.k2.mC.CCM.Bgsd61.fits'
-imgFileSuffix = 'pdf'
+# fitsFilenameSuffix = '_synthesis_eBR_v20_q036.d13c512.ps03.k2.mC.CCM.Bgsd61.fits'
+fitsFilenameSuffix = '_synthesis_eBR_v20_q042.d14512.ps03.k2.mC.CCM.Bgsd61.fits'
+
+imgFileSuffix = 'png'
 
 plt.rcParams.update({'font.family' : 'serif',
                      'text.usetex' : False,
@@ -195,7 +197,7 @@ class PCAlifa:
 #        self.f_syn_rf__zl = f_syn_rf__lz.T
 
     def PCA(self, arr, num, axis = -1, arrMean = False, sort = True):
-        if not arrMean:
+        if not arrMean.any():
             arrMean = arr.mean(axis = axis)
 
         diff = arr - arrMean
@@ -453,26 +455,21 @@ class PCAlifa:
         ax.grid()
 
     def correlationAxisPlot(self, x, y, ax):
-            rhoPearson, pvalPearson = st.pearsonr(x, y)
-            rhoSpearman, pvalSpearman = st.spearmanr(x, y)
-            pTxt = 'p: %.2f' % rhoPearson
-            spTxt = 's: %.2f' % rhoSpearman
-            ax.scatter(x, y, '.', lw = 0)
-            ax.text(0.95, 0.88, pTxt,
-                    fontsize = 10, transform = ax.transAxes,
-                    horizontalalignment = 'right',
-                    verticalalignment = 'center',
-                    multialignment = 'right',
-                    weight = 'bold')
-            ax.text(0.95, 0.72, spTxt,
-                    color = 'red',
-                    fontsize = 10, transform = ax.transAxes,
-                    horizontalalignment = 'right',
-                    verticalalignment = 'center',
-                    multialignment = 'right',
-                    weight = 'bold')
 
-            plt.setp(ax.get_yticklabels(), visible = False)
+        rhoSpearman, pvalSpearman = st.spearmanr(x, y)
+        txt = 's: %.2f' % rhoSpearman
+
+        ax.scatter(x, y, marker = 'o', s = 0.1)
+
+        textbox = dict(boxstyle = 'round', facecolor = 'wheat', alpha = 0.)
+
+        ax.text(0.76, 0.15, txt,
+                fontsize = 8,
+                transform = ax.transAxes,
+                verticalalignment = 'top',
+                bbox = textbox)
+
+        plt.setp(ax.get_yticklabels(), visible = False)
 
     def tomoPlot(self, t, l, eigvec, eigval, ms, ti, npref):
         # set_eps_output_1()
