@@ -15,27 +15,17 @@ from scipy import stats as st
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MaxNLocator
 
-imgFileSuffix = 'png'
 plt.rcParams.update({'font.family' : 'serif',
                      'text.usetex' : False,
                      })
 
 def parser_args():
     parser = ap.ArgumentParser(description = 'PCAlifa - correlations')
-    parser.add_argument('--califaID', '-c',
-                        help = 'Califa ID (ex: K0277)',
-                        type = str,
-                        default = 'K0277')
     parser.add_argument('--fitsfile', '-f',
                         help = 'The file must be named KXXXX*.fits',
                         metavar = 'PyCASSO FITS FILE',
                         type = str,
-                        default = False)
-    parser.add_argument('--fitsDir', '-d',
-                        help = 'Califa FITS directory',
-                        metavar = 'DIR',
-                        type = str,
-                        default = '/home/lacerda/CALIFA')
+                        default = None)
     parser.add_argument('--rSEL', '-S',
                         help = 'Remove Starlight Emission Lines ',
                         metavar = 'MASK FILENAME',
@@ -95,7 +85,10 @@ def parser_args():
                         help = 'If provided, this adds OUTPUTFNAME to filenames.',
                         type = str,
                         default = False)
-
+    parser.add_argument('--outputimgsuffix', '-o',
+                        help = 'Suffix of image file. Sometimes denote the image type. (Ex.: image.png)',
+                        type = str,
+                        default = 'png')
 
     return parser.parse_args()
 
@@ -142,7 +135,7 @@ def zoneRebuildSpec(iZone, evRebArr, l, O, tomo, eVec, eVal, mean, nPref, resid)
     plt.setp([a.get_xticklabels() for a in f.axes[:-nCols]], visible = False)
     plt.setp([a.get_yticklabels() for a in f.axes[::nCols]], visible = True)
     plt.suptitle(r'CALIFA ID: %s%sZone %04d' % (nPref[:5], ' ' * 60, iZone))
-    fname = '%szone_%04d.%s' % (nPref, iZone, imgFileSuffix)
+    fname = '%szone_%04d.%s' % (nPref, iZone, args.outputimgsuffix)
     f.savefig(fname)
     plt.close()
 
@@ -279,7 +272,7 @@ def correlations_PCxPC_plot(P, PCArr__zk, nPC, title, fnamepref):
         plt.suptitle(r'%s - %s' % (title, prop['fname'][p_i]))
 
         if fnamepref:
-            f.savefig('%scorre_PCxPC_%s.%s' % (fnamepref, prop['fname'][p_i], imgFileSuffix))
+            f.savefig('%scorre_PCxPC_%s.%s' % (fnamepref, prop['fname'][p_i], args.outputimgsuffix))
         else:
             plt.show()
 
@@ -344,12 +337,14 @@ def correlations_PCxPopulations_eigv(P, eigv__lk, PCArr__zk, nPC, l_obs, title, 
 if __name__ == '__main__':
     args = parser_args()
 
-    P = PCA.PCAlifa(args.califaID, args.fitsDir, args.rFL, args.lc)
+    P = PCA.PCAlifa(args.fitsfile, args.rFL, args.lc)
 
     parseArrArgs(args, P.K.N_zone - 1)
 
     if args.rSEL:
         P.setStarlightMaskFile(args.rSEL)
+
+    P.setImgSuffix(args.outputimgsuffix)
 
     P.runPCA()
 
@@ -430,11 +425,11 @@ if __name__ == '__main__':
             #########################################################################
             ######################## PC-Phys Correlations ###########################
             ############################### OBS NORM ################################
-            correlations_PCxPhys_eigv_plot(P, P.eigVec_obs_norm__lk, P.tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre.%s' % (npref_f_obs_norm, imgFileSuffix))
+            correlations_PCxPhys_eigv_plot(P, P.eigVec_obs_norm__lk, P.tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre.%s' % (npref_f_obs_norm, args.outputimgsuffix))
             ############################### SYN NORM ################################
-            correlations_PCxPhys_eigv_plot(P, P.eigVec_syn_norm__lk, P.tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre.%s' % (npref_f_syn_norm, imgFileSuffix))
+            correlations_PCxPhys_eigv_plot(P, P.eigVec_syn_norm__lk, P.tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre.%s' % (npref_f_syn_norm, args.outputimgsuffix))
             ############################### RES NORM ################################
-            correlations_PCxPhys_eigv_plot(P, P.eigVec_res_norm__lk, P.tomo_res_norm__zk, nRows, P.l_obs, r'Correlations - RES NORM', '%scorre.%s' % (npref_f_res_norm, imgFileSuffix))
+            correlations_PCxPhys_eigv_plot(P, P.eigVec_res_norm__lk, P.tomo_res_norm__zk, nRows, P.l_obs, r'Correlations - RES NORM', '%scorre.%s' % (npref_f_res_norm, args.outputimgsuffix))
 
             #########################################################################
             ######################### PC-PC Correlations ############################
@@ -448,11 +443,11 @@ if __name__ == '__main__':
             #########################################################################
             ###################### Population Correlations ##########################
             ############################### OBS NORM ################################
-            correlations_PCxPopulations_eigv(P, P.eigVec_obs_norm__lk, P.tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre_popx.%s' % (npref_f_obs_norm, imgFileSuffix))
+            correlations_PCxPopulations_eigv(P, P.eigVec_obs_norm__lk, P.tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre_popx.%s' % (npref_f_obs_norm, args.outputimgsuffix))
             ############################### SYN NORM ###############################
-            correlations_PCxPopulations_eigv(P, P.eigVec_syn_norm__lk, P.tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre_popx.%s' % (npref_f_syn_norm, imgFileSuffix))
+            correlations_PCxPopulations_eigv(P, P.eigVec_syn_norm__lk, P.tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre_popx.%s' % (npref_f_syn_norm, args.outputimgsuffix))
             ############################### RES NORM ###############################
-            correlations_PCxPopulations_eigv(P, P.eigVec_res_norm__lk, P.tomo_res_norm__zk, nRows, P.l_obs, r'Correlations - RES NORM', '%scorre_popx.%s' % (npref_f_res_norm, imgFileSuffix))
+            correlations_PCxPopulations_eigv(P, P.eigVec_res_norm__lk, P.tomo_res_norm__zk, nRows, P.l_obs, r'Correlations - RES NORM', '%scorre_popx.%s' % (npref_f_res_norm, args.outputimgsuffix))
 
         #########################################################################
         #########################################################################
@@ -507,9 +502,9 @@ if __name__ == '__main__':
                 #########################################################################
                 ######################## PC-Phys Correlations ###########################
                 ############################### OBS NORM ###############################
-                correlations_PCxPhys_eigv_plot(P, eigVec_obs_norm__lk, tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre.%s' % (npref_f_obs_norm, imgFileSuffix))
+                correlations_PCxPhys_eigv_plot(P, eigVec_obs_norm__lk, tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre.%s' % (npref_f_obs_norm, args.outputimgsuffix))
                 ############################### SYN NORM ###############################
-                correlations_PCxPhys_eigv_plot(P, eigVec_syn_norm__lk, tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre.%s' % (npref_f_syn_norm, imgFileSuffix))
+                correlations_PCxPhys_eigv_plot(P, eigVec_syn_norm__lk, tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre.%s' % (npref_f_syn_norm, args.outputimgsuffix))
 
                 #########################################################################
                 ######################### PC-PC Correlations ############################
@@ -521,9 +516,9 @@ if __name__ == '__main__':
                 #########################################################################
                 ###################### Population Correlations ##########################
                 ############################### OBS NORM ################################
-                correlations_PCxPopulations_eigv(P, eigVec_obs_norm__lk, tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre_popx.%s' % (npref_f_obs_norm, imgFileSuffix))
+                correlations_PCxPopulations_eigv(P, eigVec_obs_norm__lk, tomo_obs_norm__zk, nRows, P.l_obs, r'Correlations - OBS NORM', '%scorre_popx.%s' % (npref_f_obs_norm, args.outputimgsuffix))
                 ############################### SYN NORM ###############################
-                correlations_PCxPopulations_eigv(P, eigVec_syn_norm__lk, tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre_popx.%s' % (npref_f_syn_norm, imgFileSuffix))
+                correlations_PCxPopulations_eigv(P, eigVec_syn_norm__lk, tomo_syn_norm__zk, nRows, P.l_syn, r'Correlations - SYN NORM', '%scorre_popx.%s' % (npref_f_syn_norm, args.outputimgsuffix))
 
     #########################################################################
     ######### PCA just in intervals defined in StarlightMaskFile ############
@@ -584,7 +579,7 @@ if __name__ == '__main__':
             nRows = args.numcorrepc
 
             ############################### RES NORM ###############################
-            correlations_PCxPhys_eigv_plot(P, eigVec_res_norm__lk, tomo_res_norm__zk, nRows, l_obs, r'Correlations - intervals - RES NORM', '%scorre.%s' % (npref_f_res_norm, imgFileSuffix))
+            correlations_PCxPhys_eigv_plot(P, eigVec_res_norm__lk, tomo_res_norm__zk, nRows, l_obs, r'Correlations - intervals - RES NORM', '%scorre.%s' % (npref_f_res_norm, args.outputimgsuffix))
 
             ######################### PC-PC Correlations ############################
             ############################### RES NORM ################################
@@ -592,4 +587,4 @@ if __name__ == '__main__':
 
             ###################### Population Correlations ##########################
             ############################### RES NORM ###############################
-            correlations_PCxPopulations_eigv(P, eigVec_res_norm__lk, tomo_res_norm__zk, nRows, l_obs, r'Correlations - intervals- RES NORM', '%scorre_popx.%s' % (npref_f_res_norm, imgFileSuffix))
+            correlations_PCxPopulations_eigv(P, eigVec_res_norm__lk, tomo_res_norm__zk, nRows, l_obs, r'Correlations - intervals- RES NORM', '%scorre_popx.%s' % (npref_f_res_norm, args.outputimgsuffix))
