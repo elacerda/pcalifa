@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('agg')
 import sys
 import numpy as np
-import PCAlifa as PCA
+import pcalifa as PCA
 import argparse as ap
 from matplotlib import pyplot as plt
 from matplotlib import cm

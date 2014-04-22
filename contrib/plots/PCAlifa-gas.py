@@ -5,7 +5,7 @@ Created on 01/08/2013
 '''
 import argparse as ap
 import numpy as np
-import PCAlifa as PCA
+import pcalifa as PCA
 from astropy.io import fits
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec

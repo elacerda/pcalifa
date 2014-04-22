@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use('agg')
 import numpy as np
 import atpy
+import pyfits
 from pycasso.fitsdatacube import fitsQ3DataCube
 from pystarlight import io
 from scipy import linalg
@@ -15,6 +16,8 @@ from matplotlib import cm
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
+
+__all__ = [ 'PCAlifa', 'PCA' ]
 
 fitsDirDefault = '/home/lacerda/CALIFA/gal_fits'
 quantilFlagDefault = 0.9
@@ -76,6 +79,27 @@ class PCAlifa:
         self.maskLambdaConstrains = self.maskEmLines
 
         self._setVars()
+
+    def savePCAlifaFits(self, fitsFile = False, overwrite = False):
+        hdulist = pyfits.HDUList()
+        hdulist.append(pyfits.ImageHDU(self.I_obs__zl.data, name='I__zl'))
+        hdulist.append(pyfits.ImageHDU(self.I_obs__zl.mask.astype(int), name='I_mask__zl'))
+        hdulist.append(pyfits.ImageHDU(self.ms_obs__l.data, name='ms__l'))
+        hdulist.append(pyfits.ImageHDU(self.ms_obs__l.mask.astype(int), name='ms_mask__l'))
+        hdulist.append(pyfits.ImageHDU(self.covMat_obs__ll, name='covMat__ll'))
+        hdulist.append(pyfits.ImageHDU(self.eigVal_obs__k, name='eVal__k'))
+        hdulist.append(pyfits.ImageHDU(self.eigVec_obs__lk.data, name='eVec__lk'))
+        hdulist.append(pyfits.ImageHDU(self.eigVec_obs__lk.mask.astype(int), name='eVec_mask__lk'))
+        hdulist.append(pyfits.ImageHDU(self.tomo_obs__zk.data, name='tomo__zk'))
+        hdulist.append(pyfits.ImageHDU(self.tomo_obs__zk.mask.astype(int), name='tomo_mask__zk'))
+        hdulist.append(pyfits.ImageHDU(self.tomo_obs__kyx.data, name='tomo__kyx'))
+        hdulist.append(pyfits.ImageHDU(self.tomo_obs__kyx.mask.astype(int), name='tomo_mask__kyx'))
+
+        if not fitsFile:
+            fitsFile = PCAlifa.fits
+
+        print 'Writing to %s...' % fitsFile
+        hdulist.writeto(fitsFile, clobber = overwrite)
 
     def setImgSuffix(self, suffix):
         self.imgSuffix = suffix
