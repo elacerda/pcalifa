@@ -4,7 +4,7 @@ Created on 17/04/2013
 @author: lacerda
 '''
 import matplotlib
-matplotlib.use('agg')
+# matplotlib.use('agg')
 import numpy as np
 import atpy
 import pyfits
@@ -17,7 +17,7 @@ from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-__all__ = [ 'PCAlifa', 'PCA' ]
+__all__ = [ 'PCAlifa' ]
 
 fitsDirDefault = '/home/lacerda/CALIFA/gal_fits'
 quantilFlagDefault = 0.9
@@ -80,23 +80,35 @@ class PCAlifa:
 
         self._setVars()
 
+    def readPCAlifaFits(self, fitsFile):
+        hdulist = pyfits.open(fitsFile)
+        self.l_obs = hdulist['L_OBS'].data
+        self.I__zl = np.ma.masked_array(hdulist['I__ZL'].data, mask = hdulist['I_MASK__ZL'].data)
+        self.ms__l = np.ma.masked_array(hdulist['MS__L'].data, mask = hdulist['MS_MASK__L'].data)
+        self.covMat__ll = hdulist['COVMAT__LL'].data
+        self.eigVal__k = hdulist['EIGVAL__K'].data
+        self.eigVec__lk = np.ma.masked_array(hdulist['EIGVEC__LK'].data, mask = hdulist['EIGVEC_MASK__LK'].data)
+        self.tomo__zk = np.ma.masked_array(hdulist['TOMO__ZK'].data, mask = hdulist['TOMO_MASK__ZK'].data)
+        self.tomo__kyx = np.ma.masked_array(hdulist['TOMO__KYX'].data, mask = hdulist['TOMO_MASK__KYX'].data)
+
     def savePCAlifaFits(self, fitsFile = False, overwrite = False):
         hdulist = pyfits.HDUList()
-        hdulist.append(pyfits.ImageHDU(self.I_obs__zl.data, name='I__zl'))
-        hdulist.append(pyfits.ImageHDU(self.I_obs__zl.mask.astype(int), name='I_mask__zl'))
-        hdulist.append(pyfits.ImageHDU(self.ms_obs__l.data, name='ms__l'))
-        hdulist.append(pyfits.ImageHDU(self.ms_obs__l.mask.astype(int), name='ms_mask__l'))
-        hdulist.append(pyfits.ImageHDU(self.covMat_obs__ll, name='covMat__ll'))
-        hdulist.append(pyfits.ImageHDU(self.eigVal_obs__k, name='eVal__k'))
-        hdulist.append(pyfits.ImageHDU(self.eigVec_obs__lk.data, name='eVec__lk'))
-        hdulist.append(pyfits.ImageHDU(self.eigVec_obs__lk.mask.astype(int), name='eVec_mask__lk'))
-        hdulist.append(pyfits.ImageHDU(self.tomo_obs__zk.data, name='tomo__zk'))
-        hdulist.append(pyfits.ImageHDU(self.tomo_obs__zk.mask.astype(int), name='tomo_mask__zk'))
-        hdulist.append(pyfits.ImageHDU(self.tomo_obs__kyx.data, name='tomo__kyx'))
-        hdulist.append(pyfits.ImageHDU(self.tomo_obs__kyx.mask.astype(int), name='tomo_mask__kyx'))
+        hdulist.append(pyfits.ImageHDU(data = self.l_obs, name = 'l_obs'))
+        hdulist.append(pyfits.ImageHDU(data = self.I__zl.data, name = 'I__zl'))
+        hdulist.append(pyfits.ImageHDU(data = self.I__zl.mask.astype(int), name = 'I_mask__zl'))
+        hdulist.append(pyfits.ImageHDU(data = self.ms__l.data, name = 'ms__l'))
+        hdulist.append(pyfits.ImageHDU(data = self.ms__l.mask.astype(int), name = 'ms_mask__l'))
+        hdulist.append(pyfits.ImageHDU(data = self.covMat__ll, name = 'covMat__ll'))
+        hdulist.append(pyfits.ImageHDU(data = self.eigVal__k, name = 'eigVal__k'))
+        hdulist.append(pyfits.ImageHDU(data = self.eigVec__lk.data, name = 'eigVec__lk'))
+        hdulist.append(pyfits.ImageHDU(data = self.eigVec__lk.mask.astype(int), name = 'eigVec_mask__lk'))
+        hdulist.append(pyfits.ImageHDU(data = self.tomo__zk.data, name = 'tomo__zk'))
+        hdulist.append(pyfits.ImageHDU(data = self.tomo__zk.mask.astype(int), name = 'tomo_mask__zk'))
+        hdulist.append(pyfits.ImageHDU(data = self.tomo__kyx.data, name = 'tomo__kyx'))
+        hdulist.append(pyfits.ImageHDU(data = self.tomo__kyx.mask.astype(int), name = 'tomo_mask__kyx'))
 
         if not fitsFile:
-            fitsFile = PCAlifa.fits
+            fitsFile = self.fitsFile.split('/')[-1].replace('.fits', '_pcalifa.fits')
 
         print 'Writing to %s...' % fitsFile
         hdulist.writeto(fitsFile, clobber = overwrite)
@@ -147,54 +159,25 @@ class PCAlifa:
         return diffMasked, arrMeanMasked, covMat, wS, esMasked
 
     def PCA_obs(self):
-        self.I_obs__zl, self.ms_obs__l, self.covMat_obs__ll, self.eigVal_obs__k, self.eigVec_obs__lk = self.PCA(self.f_obs__zl, self.K.N_zone, 0)
+        self.I__zl, self.ms__l, self.covMat__ll, self.eigVal__k, self.eigVec__lk = self.PCA(self.f_obs__zl, self.K.N_zone, 0)
 
     def PCA_obs_norm(self):
-        self.I_obs_norm__zl, self.ms_obs_norm__l, self.covMat_obs_norm__ll, self.eigVal_obs_norm__k, self.eigVec_obs_norm__lk = self.PCA(self.f_obs_norm__zl, self.K.N_zone, 0)
+        self.I__zl, self.ms__l, self.covMat__ll, self.eigVal__k, self.eigVec__lk = self.PCA(self.f_obs_norm__zl, self.K.N_zone, 0)
 
     def PCA_syn(self):
-        self.I_syn__zl, self.ms_syn__l, self.covMat_syn__ll, self.eigVal_syn__k, self.eigVec_syn__lk = self.PCA(self.f_syn__zl, self.K.N_zone, 0)
+        self.I__zl, self.ms__l, self.covMat__ll, self.eigVal__k, self.eigVec__lk = self.PCA(self.f_syn__zl, self.K.N_zone, 0)
 
     def PCA_syn_norm(self):
-        self.I_syn_norm__zl, self.ms_syn_norm__l, self.covMat_syn_norm__ll, self.eigVal_syn_norm__k, self.eigVec_syn_norm__lk = self.PCA(self.f_syn_norm__zl, self.K.N_zone, 0)
+        self.I__zl, self.ms__l, self.covMat__ll, self.eigVal__k, self.eigVec__lk = self.PCA(self.f_syn_norm__zl, self.K.N_zone, 0)
 
     def PCA_res(self):
-        self.I_res__zl, self.ms_res__l, self.covMat_res__ll, self.eigVal_res__k, self.eigVec_res__lk = self.PCA(self.f_res__zl, self.K.N_zone, 0)
+        self.I__zl, self.ms__l, self.covMat__ll, self.eigVal__k, self.eigVec__lk = self.PCA(self.f_res__zl, self.K.N_zone, 0)
 
     def PCA_res_norm(self):
-        self.I_res_norm__zl, self.ms_res_norm__l, self.covMat_res_norm__ll, self.eigVal_res_norm__k, self.eigVec_res_norm__lk = self.PCA(self.f_res_norm__zl, self.K.N_zone, 0)
+        self.I__zl, self.ms__l, self.covMat__ll, self.eigVal__k, self.eigVec__lk = self.PCA(self.f_res_norm__zl, self.K.N_zone, 0)
 
-    def tomograms_obs(self):
-        self.tomo_obs__zk, self.tomo_obs__kyx = self.tomogram(self.I_obs__zl, self.eigVec_obs__lk)
-
-    def tomograms_obs_norm(self):
-        self.tomo_obs_norm__zk, self.tomo_obs_norm__kyx = self.tomogram(self.I_obs_norm__zl, self.eigVec_obs_norm__lk)
-
-    def tomograms_syn(self):
-        self.tomo_syn__zk, self.tomo_syn__kyx = self.tomogram(self.I_syn__zl, self.eigVec_syn__lk)
-
-    def tomograms_syn_norm(self):
-        self.tomo_syn_norm__zk, self.tomo_syn_norm__kyx = self.tomogram(self.I_syn_norm__zl, self.eigVec_syn_norm__lk)
-
-    def tomograms_res(self):
-        self.tomo_res__zk, self.tomo_res__kyx = self.tomogram(self.I_res__zl, self.eigVec_res__lk)
-
-    def tomograms_res_norm(self):
-        self.tomo_res_norm__zk, self.tomo_res_norm__kyx = self.tomogram(self.I_res_norm__zl, self.eigVec_res_norm__lk)
-
-    def runPCA(self):
-        self.PCA_obs()
-        self.PCA_obs_norm()
-        self.PCA_res()
-        self.PCA_res_norm()
-        self.PCA_syn()
-        self.PCA_syn_norm()
-        self.tomograms_obs()
-        self.tomograms_obs_norm()
-        self.tomograms_res()
-        self.tomograms_res_norm()
-        self.tomograms_syn()
-        self.tomograms_syn_norm()
+    def tomograms(self):
+        self.tomo__zk, self.tomo__kyx = self.tomogram(self.I__zl, self.eigVec__lk)
 
     def tomogram(self, I, eigVec):
         t__zk = np.ma.dot(I, eigVec)
@@ -234,8 +217,16 @@ class PCAlifa:
         self.f_res__zl = False
         self.f_res_norm__zl = False
 
+        self.I__zl = False
+        self.ms__l = False
+        self.covMat__ll = False
+        self.eigVal__k = False
+        self.eigVec__lk = False
+
     def setLambdaConstrains(self, lc):
         lc = np.array(lc)
+        self.lc = lc
+
         s = np.argsort(lc)
         ldown = lc[s][0]
         lup = lc[s][1]
@@ -245,6 +236,7 @@ class PCAlifa:
         self._setVars()
 
     def unsetLambdaConstrains(self):
+        self.lc = False
         self.maskLambdaConstrains = np.ones_like(self.K.l_obs, dtype = np.bool)
         self._setVars()
 
@@ -349,9 +341,14 @@ class PCAlifa:
 
         plt.setp(ax.get_yticklabels(), visible = False)
 
-    def tomoPlot(self, t, l, eigvec, eigval, ms, ti, npref):
+    def tomoPlot(self, ti, npref):
+        t = self.tomo__kyx
+        eigvec = self.eigVec__lk
+        eigval = self.eigVal__k
+        ms = self.ms__l
+
         tomogram = t[ti, :, :]
-        x = l
+        x = self.l_obs
         y = eigvec[:, ti]
         y2 = ms
 
@@ -385,15 +382,17 @@ class PCAlifa:
 #        ax3.set_title(r'Radial Profile')
 #        ax3.set_xlabel(r'$R_{50}$')
 
-        plt.tight_layout()
+        fig.set_tight_layout(True)
 
         if npref:
             fig.savefig('%stomo_%02i.%s' % (npref, ti, self.imgSuffix))
         else:
             fig.show()
 
-    def screeTestPlot(self, eigval, maxInd, title, npref):
+    def screeTestPlot(self, maxInd, title, npref):
         # set_eps_output_1()
+        eigval = self.eigVal__k
+
         f = plt.figure()
         f.set_size_inches(19.2, 10.8)
         eigval_norm = 100. * eigval / eigval.sum()
