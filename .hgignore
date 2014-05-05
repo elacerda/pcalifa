@@ -1,5 +1,7 @@
 
 syntax: glob
 *.png
+contrib/plots/*.pdf
+.settings
 syntax: regexp
 ^src/runallgal\.sh$
