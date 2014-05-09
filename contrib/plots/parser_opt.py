@@ -10,7 +10,7 @@ default = {
     'lc' : [3800, 6850],
     'outputImgSuffix' : 'png',
     'outputDir' : '.',
-    'firstTomo' : -1,
+    'firstTomo' : 0,
     'nTomo' : 5,
     'zone' : 0,
     'eigv' : [1, 2, 3, 4, 5, 6, 10, 20],
