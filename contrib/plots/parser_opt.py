@@ -4,8 +4,9 @@ import sys
 import argparse as ap
 import numpy as np
 
-default = { 
-    'rSEL' : '/home/lacerda/CALIFA/Mask.mC',
+default = {
+    'fitsfile' : None,
+    'rSEL' : None,
     'rFL' : 0.95,
     'lc' : [3800, 6850],
     'outputImgSuffix' : 'png',
@@ -22,7 +23,7 @@ def parser_args():
                         help = 'The file must be named KXXXX*.fits',
                         metavar = 'PyCASSO FITS FILE',
                         type = str,
-                        default = None)
+                        default = default['fitsfile'])
     parser.add_argument('--lc', '-l',
                         help = 'Lambda constrains',
                         metavar = 'LAMBDA',
@@ -64,7 +65,7 @@ def parser_args():
                         type = str,
                         default = default['rSEL'])
     parser.add_argument('--rFL', '-Q',
-                        help = 'Remove Flagged Lamdas',
+                        help = 'Remove Flagged Lambdas',
                         metavar = 'QUANTIL',
                         type = float,
                         default = default['rFL'])
@@ -78,4 +79,4 @@ def parser_args():
 
 def parseArrArgs(args):
     args.eigvArr = np.array(args.eigv)
- 
+
