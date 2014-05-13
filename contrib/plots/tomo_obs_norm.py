@@ -60,7 +60,7 @@ for i in range(nPCs):
 
     ax2.plot(l, pc, 'k')
     ax2.set_ylabel(r'$PC %02i$' % tn)
-    ax2.set_ylabel(r'$\lambda$ [\AA]')
+    ax2.set_ylabel(r'$\lambda$ [$\AA$]')
     ax2.grid()
     ax3 = ax2.twinx()
     ax3.plot(l, f_obs_mean, color = '0.65')

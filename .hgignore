@@ -3,5 +3,6 @@ syntax: glob
 *.png
 contrib/plots/*.pdf
 .settings
+contrib/utils/parser_opt.py
 syntax: regexp
 ^src/runallgal\.sh$
