@@ -61,7 +61,6 @@ for i in range(nPCs):
     ax2.plot(l, pc, 'k')
     ax2.set_ylabel(r'$PC %02i$' % tn)
 #    plt.setp(ax2.get_xticklabels(), rotation = 45)
-    ax2.set_ylabel(r'$\lambda$ [$\AA$]')
     ax2.grid()
     ax3 = ax2.twinx()
     ax3.plot(l, f_syn_mean, color = '0.65')
